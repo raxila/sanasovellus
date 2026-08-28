@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Englannin ääntämisharjoitus</title>
+  <style>
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 20px auto; padding: 20px; text-align: center; background: #f0f2f5; color: #333; }
+    .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 20px; }
+    input { padding: 12px; margin: 5px; font-size: 16px; border-radius: 8px; border: 1px solid #ccc; width: 80%; max-width: 250px; }
+    button { padding: 12px 20px; margin: 5px; font-size: 16px; border-radius: 8px; border: none; background: #4CAF50; color: white; cursor: pointer; font-weight: bold; }
+    button:hover { opacity: 0.9; }
+    .btn-listen { background: #2196F3; }
+    .btn-speak { background: #ff9800; }
+    .btn-delete { background: #f44336; padding: 6px 12px; font-size: 14px; }
+    .word-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee; text-align: left; }
+    #feedback { font-size: 18px; font-weight: bold; margin-top: 15px; min-height: 24px; }
+  </style>
+</head>
+<body>
+
+  <h1>🎤 Ääntämisharjoitus</h1>
+
+  <!-- Sanan lisäys -->
+  <div class="card">
+    <h3>Lisää uusi sana</h3>
+    <input type="text" id="fiWord" placeholder="Suomeksi (esim. Koira)">
+    <input type="text" id="enWord" placeholder="Englanniksi (esim. dog)">
+    <br>
+    <button onclick="addWord()">Tallenna sana</button>
+  </div>
+
+  <!-- Harjoittelu -->
+  <div class="card">
+    <h3>Harjoittele</h3>
+    <p id="promptText" style="font-size: 20px; font-weight: bold;">Valitse sana alla olevasta listasta!</p>
+    <button class="btn-listen" onclick="speakExample()">🔊 Kuuntele malli</button>
+    <button class="btn-speak" onclick="startListening()">🎤 Puhu nyt</button>
+    <div id="feedback"></div>
+  </div>
+
+  <!-- Sanalista -->
+  <div class="card">
+    <h3>Sanalistasi</h3>
+    <div id="wordList">Ladataan sanoja...</div>
+  </div>
+
+  <!-- Firebase Scriptit -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    // === KORVAA NÄMÄ OMASTA FIREBASE-KONSOLISTASI ===
+    const firebaseConfig = {
+        apiKey: "YOUR_API_KEY",
+        authDomain: "YOUR_AUTH_DOMAIN",
+        projectId: "YOUR_PROJECT_ID",
+        storageBucket: "YOUR_STORAGE_BUCKET",
+        messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+        appId: "YOUR_APP_ID"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    let currentWord = null;
+    let words = [];
+
+    // Luetaan sanat Firebasesta reaaliajassa
+    onSnapshot(collection(db, "sanat"), (snapshot) => {
+        words = [];
+        snapshot.forEach((doc) => {
+            words.push({ id: doc.id, ...doc.data() });
+        });
+        renderList();
+    });
+
+    // Lisää sana Firebaseen
+    window.addWord = async function() {
+        const fi = document.getElementById("fiWord").value.trim();
+        const en = document.getElementById("enWord").value.trim();
+
+        if (!fi || !en) return alert("Täytä molemmat kentät!");
+
+        await addDoc(collection(db, "sanat"), { suomi: fi, englanti: en });
+        document.getElementById("fiWord").value = "";
+        document.getElementById("enWord").value = "";
+    };
+
+    // Poista sana Firebasesta
+    window.deleteWord = async function(id) {
+        await deleteDoc(doc(db, "sanat", id));
+        if (currentWord && currentWord.id === id) {
+            currentWord = null;
+            document.getElementById("promptText").innerText = "Valitse sana alla olevasta listasta!";
+            document.getElementById("feedback").innerText = "";
+        }
+    };
+
+    // Näytä sanalista ruudulla
+    function renderList() {
+        const listEl = document.getElementById("wordList");
+        listEl.innerHTML = "";
+        if (words.length === 0) {
+            listEl.innerHTML = "<p>Ei vielä sanoja. Lisää ensimmäinen sana yllä!</p>";
+            return;
+        }
+        words.forEach(w => {
+            const item = document.createElement("div");
+            item.className = "word-item";
+            item.innerHTML = `
+                <span><strong>${w.suomi}</strong> = <em>${w.englanti}</em></span>
+                <div>
+                    <button onclick='selectWord(${JSON.stringify(w)})'>Valitse</button>
+                    <button class="btn-delete" onclick="deleteWord('${w.id}')">Poista</button>
+                </div>
+            `;
+            listEl.appendChild(item);
+        });
+    }
+
+    // Valitse harjoiteltava sana
+    window.selectWord = function(w) {
+        currentWord = w;
+        document.getElementById("promptText").innerText = `Sano englanniksi: "${w.suomi}"`;
+        document.getElementById("feedback").innerText = "";
+    };
+
+    // Puhu malliesimerkki (Speech Synthesis)
+    window.speakExample = function() {
+        if (!currentWord) return alert("Valitse ensin sana listasta!");
+        const utterance = new SpeechSynthesisUtterance(currentWord.englanti);
+        utterance.lang = "en-US";
+        window.speechSynthesis.speak(utterance);
+    };
+
+    // Kuuntele käyttäjän puhetta (Speech Recognition)
+    window.startListening = function() {
+        if (!currentWord) return alert("Valitse ensin sana listasta!");
+
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) return alert("Selaimesi ei tue puheentunnistusta. Käytä Chrome-selainta.");
+
+        const recognition = new SpeechRecognition();
+        recognition.lang = 'en-US';
+        
+        const feedbackEl = document.getElementById("feedback");
+        feedbackEl.innerText = "🎧 Kuunnellaan... Puhu nyt!";
+        feedbackEl.style.color = "#ff9800";
+
+        recognition.start();
+
+        recognition.onresult = (event) => {
+            const recognizedText = event.results[0][0].transcript.toLowerCase().trim();
+            const confidence = Math.round(event.results[0][0].confidence * 100);
+            const targetText = currentWord.englanti.toLowerCase().trim();
+
+            if (recognizedText === targetText) {
+                feedbackEl.style.color = "green";
+                feedbackEl.innerText = `Oikein! 🎉 (Kuultiin: "${recognizedText}", Varmuus: ${confidence}%)`;
+            } else {
+                feedbackEl.style.color = "red";
+                feedbackEl.innerText = `Yritä uudelleen! (Kuultiin: "${recognizedText}", Pitäisi olla: "${targetText}")`;
+            }
+        };
+
+        recognition.onerror = () => {
+            feedbackEl.style.color = "red";
+            feedbackEl.innerText = "Virhe kuuntelussa. Varmista mikrofonin luvat.";
+        };
+    };
+  </script>
+</body>
+</html>
