@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Englannin Sanakoe - Harjoita sanoja!</title>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <style>
         :root { --primary-color: #4A90E2; --secondary-color: #FF9F1C; --success-color: #2EC4B6; --danger-color: #E71D36; --bg-color: #F4F7F6; --card-bg: #FFFFFF; --text-color: #2B2D42; --border-radius: 16px; }
@@ -269,17 +270,38 @@ window.onload = function() {
     checkExistingLogin();
 };
 
+
+// --- KIRJAUTUMINEN JA GOOGLE AUTH ---
+
 function checkExistingLogin() {
-    const savedName = localStorage.getItem('vocab_current_user');
-    if (savedName) {
-        document.getElementById('loginNameInput').value = savedName;
-        loginUser();
-    } else {
-        document.getElementById('mainNav').style.display = 'none';
-        showView('loginView');
-    }
+    firebase.auth().onAuthStateChanged((user) => {
+        if (user) {
+            const email = user.email.toLowerCase();
+            const allowedGmailAccounts = [
+                'hannu.t.kari@gmail.com',
+                'leevi.r.kari@gmail.com',
+                'sanna.tuikkanen@gmail.com'
+            ];
+            
+            if (email.endsWith('@edu.parkano.fi') || allowedGmailAccounts.includes(email)) {
+                currentUser = user.displayName || user.email.split('@')[0];
+                document.getElementById('displayUserName').innerText = currentUser;
+                document.getElementById('welcomeNameText').innerText = currentUser;
+                document.getElementById('summaryUserName').innerText = currentUser;
+                document.getElementById('statsUserNameDisplay').innerText = currentUser;
+                document.getElementById('mainNav').style.display = 'block';
+                showView('menuView');
+            } else {
+                firebase.auth().signOut();
+                showView('loginView');
+            }
+        } else {
+            document.getElementById('mainNav').style.display = 'none';
+            showView('loginView');
+        }
+    });
 }
-// Google-kirjautumisprosessi
+
 function loginWithGoogle() {
     const provider = new firebase.auth.GoogleAuthProvider();
     const errorEl = document.getElementById('loginErrorMsg');
@@ -290,19 +312,16 @@ function loginWithGoogle() {
             const user = result.user;
             const email = user.email.toLowerCase();
 
-            // Määritä sallitut yksittäiset Gmail-osoitteet
             const allowedGmailAccounts = [
                 'hannu.t.kari@gmail.com',
                 'leevi.r.kari@gmail.com',
                 'sanna.tuikkanen@gmail.com'
             ];
 
-            // Tarkistetaan täyttääkö sähköposti ehdot selaimessa
             const isEduAddress = email.endsWith('@edu.parkano.fi');
             const isAllowedGmail = allowedGmailAccounts.includes(email);
 
             if (isEduAddress || isAllowedGmail) {
-                // Hyväksytty käyttäjä
                 currentUser = user.displayName || user.email.split('@')[0];
                 document.getElementById('displayUserName').innerText = currentUser;
                 document.getElementById('welcomeNameText').innerText = currentUser;
@@ -312,7 +331,6 @@ function loginWithGoogle() {
                 document.getElementById('mainNav').style.display = 'block';
                 showView('menuView');
             } else {
-                // Hylätty käyttäjä -> Kirjataan ulos välittömästi
                 firebase.auth().signOut();
                 errorEl.style.display = 'block';
                 errorEl.style.background = '#FEE2E2';
@@ -328,11 +346,15 @@ function loginWithGoogle() {
 
 function logoutUser() {
     firebase.auth().signOut().then(() => {
-        currentUser = ''; currentListName = ''; wordList = [];
+        currentUser = ''; 
+        currentListName = ''; 
+        wordList = [];
         document.getElementById('mainNav').style.display = 'none';
         showView('loginView');
     });
 }
+
+
 
 // Tarkista onko käyttäjä jo valmiiksi kirjautunut sisään
 function checkExistingLogin() {
