@@ -38,7 +38,6 @@
         .star-rating { color: #F59E0B; letter-spacing: 2px; }
         .user-chip { display:inline-flex; align-items:center; gap:5px; background:#FEF3C7; color:#B45309; padding:5px 12px; border-radius:20px; font-weight:bold; font-size:0.9rem; border:1px solid #FDE68A; }
         
-        /* Uudet tyylit ääntämisharjoitukselle */
         @keyframes pulse { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7); } 70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(220, 38, 38, 0); } 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); } }
         .recording { animation: pulse 1.5s infinite; background-color: #DC2626 !important; color: white; }
     </style>
@@ -150,7 +149,7 @@
         <canvas id="gameCanvas" width="600" height="350"></canvas>
     </div>
     
-    <!-- 5. PRONUNCIATION GAME (UUSI) -->
+    <!-- 5. PRONUNCIATION GAME -->
     <div id="pronunciationView" class="view">
         <h2>🎤 Ääntämisharjoitus</h2>
         <p style="text-align:center; font-size:1.3rem; font-weight:bold; margin-bottom:15px;" id="pronunciationPrompt">Ladataan...</p>
@@ -236,6 +235,7 @@ const firebaseConfig = {
     messagingSenderId: "477907715360",
     appId: "1:477907715360:web:53518e05ae2731b602c345"
 };
+
 // --- GLOBAALIT MUUTTUJAT ---
 let currentUser = '';
 let wordList = [];
@@ -270,9 +270,7 @@ window.onload = function() {
     checkExistingLogin();
 };
 
-
 // --- KIRJAUTUMINEN JA GOOGLE AUTH ---
-
 function checkExistingLogin() {
     firebase.auth().onAuthStateChanged((user) => {
         if (user) {
@@ -354,39 +352,6 @@ function logoutUser() {
     });
 }
 
-
-
-// Tarkista onko käyttäjä jo valmiiksi kirjautunut sisään
-function checkExistingLogin() {
-    firebase.auth().onAuthStateChanged((user) => {
-        if (user) {
-            const email = user.email.toLowerCase();
-            const allowedGmailAccounts = ['ope.esimerkki@gmail.com', 'toinen.testaaja@gmail.com'];
-            
-            if (email.endsWith('@edu.parkano.fi') || allowedGmailAccounts.includes(email)) {
-                currentUser = user.displayName || user.email.split('@')[0];
-                document.getElementById('displayUserName').innerText = currentUser;
-                document.getElementById('welcomeNameText').innerText = currentUser;
-                document.getElementById('summaryUserName').innerText = currentUser;
-                document.getElementById('statsUserNameDisplay').innerText = currentUser;
-                document.getElementById('mainNav').style.display = 'block';
-                showView('menuView');
-            } else {
-                firebase.auth().signOut();
-                showView('loginView');
-            }
-        } else {
-            document.getElementById('mainNav').style.display = 'none';
-            showView('loginView');
-        }
-    });
-}
-function logoutUser() {
-    localStorage.removeItem('vocab_current_user');
-    currentUser = ''; currentListName = ''; wordList = [];
-    document.getElementById('mainNav').style.display = 'none';
-    showView('loginView');
-}
 function recordWordResult(wordEn, isCorrect) {
     if (!wordEn || !currentUser || !currentListName) return;
     if (!appStats[currentUser]) appStats[currentUser] = {};
@@ -396,6 +361,7 @@ function recordWordResult(wordEn, isCorrect) {
     else appStats[currentUser][currentListName][wordEn].wrong++;
     localStorage.setItem('vocab_app_stats', JSON.stringify(appStats));
 }
+
 function showView(viewId) {
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     document.getElementById(viewId).classList.add('active');
@@ -405,6 +371,7 @@ function showView(viewId) {
         stopShooterGame();
     }
 }
+
 function getWeightedRandomWords(count = 5) {
     const validWords = wordList.filter(w => w.en && w.en.trim() !== '' && w.fi && w.fi.trim() !== '');
     if (validWords.length === 0) return [];
@@ -632,7 +599,7 @@ function shooterLoop() {
     shooterAnim = requestAnimationFrame(shooterLoop);
 }
 
-// 4. ÄÄNTÄMISHARJOITUS (UUSI)
+// 4. ÄÄNTÄMISHARJOITUS
 function setupPronunciation() {
     const w = currentPracticeWords[currentWordIndex];
     document.getElementById('pronunciationPrompt').innerText = `Sano englanniksi: "${w.fi}"`;
@@ -759,6 +726,7 @@ function initFirebaseCloud() {
         document.getElementById('cloudStatusText').innerText = "Offline Tila";
     }
 }
+
 function loadPacksFromCloud() {
     if (!isFirebaseConnected) return;
     db.collection('wordpacks').get().then(snap => {
@@ -767,6 +735,7 @@ function loadPacksFromCloud() {
         snap.forEach(doc => { const p = doc.data(); select.innerHTML += `<option value="${doc.id}">${p.name} (${p.words.length} sanaa)</option>`; });
     });
 }
+
 function downloadSelectedWordpack() {
     if (!isFirebaseConnected) { alert("Yhteys pilveen katkennut."); return; }
     const id = document.getElementById('listSelector').value;
@@ -785,6 +754,7 @@ function downloadSelectedWordpack() {
         }
     });
 }
+
 function uploadWordsToFirebase() {
     if (!isFirebaseConnected) { alert("Yhteyttä pilveen ei ole. Yritä uudelleen myöhemmin."); return; }
     const name = document.getElementById('newWordpackName').value.trim();
@@ -810,7 +780,6 @@ function uploadWordsToFirebase() {
 
 function saveScoreAndReturn() {
     if (isFirebaseConnected && practiceType && currentListName) {
-        
         let typeName = 'Tuntematon';
         if (practiceType === 'cards') typeName = 'Kortit';
         else if (practiceType === 'spelling') typeName = 'Kirjoitus';
