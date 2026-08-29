@@ -210,7 +210,7 @@
             <p style="color: var(--primary-color); font-size: 1.8rem; margin-top: 15px;">🏅 Kokonaispisteet: <strong><span id="finalTotalScore">0</span></strong></p>
             
             <div id="questAwardNotice" style="font-size:1.1rem; font-weight:bold; color:#4F46E5; margin-top:15px; display:none; background:#EEF2FF; padding:15px; border-radius:12px; border:2px solid #C7D2FE;">
-                🧙‍♂️ Etenit polulla kohti Taikalinnaa! (Vähintään 3/5 oikein)
+                🧙‍♂️ Etenit polulla kohti Taikalinnaan! (Vähintään 3/5 oikein)
             </div>
         </div>
         <div style="text-align:center;">
@@ -336,8 +336,8 @@ function updateQuestUI() {
     const playerEl = document.getElementById('questPlayer');
 
     if (!currentUser || !currentListName) {
-        titleEl.innerText = "Matka Taikalinnaan 🏰";
-        statusEl.innerText = "Valitse sanalista aloittaaksesi seikkailusi!";
+        titleEl.textContent = "Matka Taikalinnaan 🏰";
+        statusEl.textContent = "Valitse sanalista aloittaaksesi seikkailusi!";
         fillEl.style.width = '0%';
         playerEl.style.left = '0%';
         return;
@@ -346,7 +346,7 @@ function updateQuestUI() {
     const passed = getCurrentListProgress();
     const maxMilestone = 18;
     
-    titleEl.innerText = `Seikkailu listalla: ${currentListName}`;
+    titleEl.textContent = `Seikkailu listalla: ${currentListName}`;
     
     let locationName = "Leirissä";
     let nextGoal = 3;
@@ -357,12 +357,11 @@ function updateQuestUI() {
     else if (passed >= 3) { locationName = "Synkässä metsässä"; nextGoal = 7; }
     
     if (passed >= 18) {
-        statusEl.innerText = `Olet saavuttanut linnan tällä listalla! (${passed} peliä pelattu)`;
+        statusEl.textContent = `Olet saavuttanut linnan tällä listalla! (${passed} peliä pelattu)`;
     } else {
-        statusEl.innerText = `Olet ${locationName}. Seuraava etappi: ${passed} / ${nextGoal} peliä (väh. 3⭐)`;
+        statusEl.textContent = `Olet ${locationName}. Seuraava etappi: ${passed} / ${nextGoal} peliä (väh. 3⭐)`;
     }
 
-    // Prosentti 0-100 visuaaliselle janalle
     const progressPct = Math.min(100, (passed / maxMilestone) * 100);
     fillEl.style.width = progressPct + '%';
     playerEl.style.left = progressPct + '%';
@@ -381,10 +380,10 @@ function checkExistingLogin() {
             
             if (email.endsWith('@edu.parkano.fi') || allowedGmailAccounts.includes(email)) {
                 currentUser = user.displayName || user.email.split('@')[0];
-                document.getElementById('displayUserName').innerText = currentUser;
-                document.getElementById('welcomeNameText').innerText = currentUser;
-                document.getElementById('summaryUserName').innerText = currentUser;
-                document.getElementById('statsUserNameDisplay').innerText = currentUser;
+                document.getElementById('displayUserName').textContent = currentUser;
+                document.getElementById('welcomeNameText').textContent = currentUser;
+                document.getElementById('summaryUserName').textContent = currentUser;
+                document.getElementById('statsUserNameDisplay').textContent = currentUser;
                 document.getElementById('mainNav').style.display = 'block';
                 showView('menuView');
                 updateQuestUI();
@@ -420,10 +419,10 @@ function loginWithGoogle() {
 
             if (isEduAddress || isAllowedGmail) {
                 currentUser = user.displayName || user.email.split('@')[0];
-                document.getElementById('displayUserName').innerText = currentUser;
-                document.getElementById('welcomeNameText').innerText = currentUser;
-                document.getElementById('summaryUserName').innerText = currentUser;
-                document.getElementById('statsUserNameDisplay').innerText = currentUser;
+                document.getElementById('displayUserName').textContent = currentUser;
+                document.getElementById('welcomeNameText').textContent = currentUser;
+                document.getElementById('summaryUserName').textContent = currentUser;
+                document.getElementById('statsUserNameDisplay').textContent = currentUser;
 
                 document.getElementById('mainNav').style.display = 'block';
                 showView('menuView');
@@ -433,7 +432,7 @@ function loginWithGoogle() {
                 errorEl.style.display = 'block';
                 errorEl.style.background = '#FEE2E2';
                 errorEl.style.color = '#991B1B';
-                errorEl.innerText = `Pääsy evätty! Osoitteella ${email} ei ole käyttöoikeutta.`;
+                errorEl.textContent = `Pääsy evätty! Osoitteella ${email} ei ole käyttöoikeutta.`;
             }
         })
         .catch((error) => {
@@ -515,14 +514,14 @@ function startPractice(type) {
     currentWordIndex = 0; starsEarned = 0; secondsElapsed = 0; shooterScore = 0; finalGameScore = 0;
     
     document.getElementById('gameScoreBar').style.display = 'flex';
-    document.getElementById('starCount').innerText = '0';
-    document.getElementById('progressDisplay').innerText = `1/${currentPracticeWords.length}`;
+    document.getElementById('starCount').textContent = '0';
+    document.getElementById('progressDisplay').textContent = `1/${currentPracticeWords.length}`;
     
     if(timerInterval) clearInterval(timerInterval);
-    document.getElementById('timerDisplay').innerText = '00:00';
+    document.getElementById('timerDisplay').textContent = '00:00';
     timerInterval = setInterval(() => {
         secondsElapsed++;
-        document.getElementById('timerDisplay').innerText = String(Math.floor(secondsElapsed / 60)).padStart(2, '0') + ':' + String(secondsElapsed % 60).padStart(2, '0');
+        document.getElementById('timerDisplay').textContent = String(Math.floor(secondsElapsed / 60)).padStart(2, '0') + ':' + String(secondsElapsed % 60).padStart(2, '0');
     }, 1000);
     
     if (type === 'cards') { showView('cardsView'); setupCard(); }
@@ -538,11 +537,10 @@ function nextWord() {
         stopShooterGame();
         
         finalGameScore = calculateTotalScore();
-        document.getElementById('finalStars').innerText = starsEarned;
-        document.getElementById('finalTime').innerText = document.getElementById('timerDisplay').innerText;
-        document.getElementById('finalTotalScore').innerText = finalGameScore;
+        document.getElementById('finalStars').textContent = starsEarned;
+        document.getElementById('finalTime').textContent = document.getElementById('timerDisplay').textContent;
+        document.getElementById('finalTotalScore').textContent = finalGameScore;
         
-        // SEIKKAILUN EDISTYMISEN TARKISTUS (Väh. 3 tähteä ja lista valittuna)
         const awardNotice = document.getElementById('questAwardNotice');
         if (starsEarned >= 3 && currentListName) {
             incrementListProgress();
@@ -553,7 +551,7 @@ function nextWord() {
         
         showView('summaryView');
     } else {
-        document.getElementById('progressDisplay').innerText = `${currentWordIndex + 1}/${currentPracticeWords.length}`;
+        document.getElementById('progressDisplay').textContent = `${currentWordIndex + 1}/${currentPracticeWords.length}`;
         if (practiceType === 'cards') setupCard();
         else if (practiceType === 'spelling') setupSpelling();
         else if (practiceType === 'shooter') setupShooter();
@@ -569,21 +567,21 @@ function setupCard() {
     document.getElementById('flashCard').classList.remove('flipped');
     const w = currentPracticeWords[currentWordIndex];
     isEnglishFront = Math.random() > 0.5;
-    if (isEnglishFront) document.getElementById('cardFront').innerText = w.en;
-    else document.getElementById('cardFront').innerText = w.fi;
-    document.getElementById('cardBack').innerText = ""; 
+    if (isEnglishFront) document.getElementById('cardFront').textContent = w.en;
+    else document.getElementById('cardFront').textContent = w.fi;
+    document.getElementById('cardBack').textContent = ""; 
 }
 function flipCard() { 
     isCardFlipped = !isCardFlipped; 
     const w = currentPracticeWords[currentWordIndex];
-    if (isEnglishFront) document.getElementById('cardBack').innerText = w.fi;
-    else document.getElementById('cardBack').innerText = w.en;
+    if (isEnglishFront) document.getElementById('cardBack').textContent = w.fi;
+    else document.getElementById('cardBack').textContent = w.en;
     document.getElementById('flashCard').classList.toggle('flipped'); 
 }
 function answerCard(correct) { 
     recordWordResult(currentPracticeWords[currentWordIndex].en, correct);
     if (correct) starsEarned++; 
-    document.getElementById('starCount').innerText = starsEarned; 
+    document.getElementById('starCount').textContent = starsEarned; 
     nextWord(); 
 }
 
@@ -593,7 +591,7 @@ function setupSpelling() {
     hintUsed = false; spellingHintIdx = 0;
     const w = currentPracticeWords[currentWordIndex];
     currentSpellingWord = w.en.trim();
-    document.getElementById('spellingPrompt').innerText = `Käännä englanniksi: "${w.fi}"`;
+    document.getElementById('spellingPrompt').textContent = `Käännä englanniksi: "${w.fi}"`;
     document.getElementById('spellingInput').value = '';
     document.getElementById('spellingFeedback').style.display = 'none';
     document.getElementById('spellingInput').focus();
@@ -606,7 +604,7 @@ function updateSpellingHint() {
         else if (i < spellingHintIdx) h += currentSpellingWord[i].toUpperCase() + ' ';
         else h += '_ ';
     }
-    document.getElementById('spellingHintDisplay').innerText = h.trim();
+    document.getElementById('spellingHintDisplay').textContent = h.trim();
 }
 function giveSpellingHint() { hintUsed = true; if(spellingHintIdx < currentSpellingWord.length) { spellingHintIdx++; updateSpellingHint(); } }
 function checkSpelling(e) {
@@ -620,14 +618,14 @@ function checkSpelling(e) {
         if(!hintUsed) { starsEarned++; } 
         
         feedbackEl.style.display = 'block'; feedbackEl.style.background = '#DCFCE7'; feedbackEl.style.color = '#15803D';
-        feedbackEl.innerHTML = `🎉 Oikein! Hienoa työtä!`;
-        document.getElementById('starCount').innerText = starsEarned;
+        feedbackEl.textContent = `🎉 Oikein! Hienoa työtä!`;
+        document.getElementById('starCount').textContent = starsEarned;
         
         setTimeout(() => { feedbackEl.style.display = 'none'; nextWord(); }, 1200);
     } else {
         recordWordResult(currentPracticeWords[currentWordIndex].en, false);
         feedbackEl.style.display = 'block'; feedbackEl.style.background = '#FEE2E2'; feedbackEl.style.color = '#991B1B';
-        feedbackEl.innerHTML = `❌ Väärin! Yritä uudelleen.`; 
+        feedbackEl.textContent = `❌ Väärin! Yritä uudelleen.`; 
         setTimeout(() => { feedbackEl.style.display = 'none'; }, 2000);
     }
 }
@@ -642,8 +640,8 @@ function setupShooter() {
     if(!targetWord) targetWord = "WORD";
     
     collected = ''; bullets = []; letters = []; floatingTexts = [];
-    document.getElementById('shooterScore').innerText = shooterScore;
-    document.getElementById('shooterTargetWord').innerText = w.fi; 
+    document.getElementById('shooterScore').textContent = shooterScore;
+    document.getElementById('shooterTargetWord').textContent = w.fi; 
     updateShooterUI();
     
     window.onkeydown = e => { keys[e.code] = true; if(e.code === 'Space') e.preventDefault(); };
@@ -652,7 +650,7 @@ function setupShooter() {
 }
 function updateShooterUI() {
     let d = ''; for(let i=0; i<targetWord.length; i++) d += (i < collected.length ? collected[i] : '_') + ' ';
-    document.getElementById('shooterCollectedText').innerText = d;
+    document.getElementById('shooterCollectedText').textContent = d;
 }
 function stopShooterGame() { if (shooterAnim) cancelAnimationFrame(shooterAnim); }
 function shooterLoop() {
@@ -682,17 +680,17 @@ function shooterLoop() {
             let b = bullets[j];
             if (Math.hypot(b.x - l.x, b.y - l.y) < l.radius + 4) {
                 if (l.char === targetWord[collected.length]) {
-                    shooterScore += 1; document.getElementById('shooterScore').innerText = shooterScore;
+                    shooterScore += 1; document.getElementById('shooterScore').textContent = shooterScore;
                     floatingTexts.push({ text: '+1', x: l.x, y: l.y, color: '#22C55E', alpha: 1 });
                     collected += l.char; updateShooterUI();
                     if (collected === targetWord) {
                         recordWordResult(currentPracticeWords[currentWordIndex].en, true);
-                        starsEarned++; document.getElementById('starCount').innerText = starsEarned;
+                        starsEarned++; document.getElementById('starCount').textContent = starsEarned;
                         speakCurrentWord();
                         setTimeout(() => nextWord(), 600); return; 
                     }
                 } else {
-                    shooterScore -= 1; document.getElementById('shooterScore').innerText = shooterScore;
+                    shooterScore -= 1; document.getElementById('shooterScore').textContent = shooterScore;
                     floatingTexts.push({ text: '-1', x: l.x, y: l.y, color: '#EF4444', alpha: 1 });
                     recordWordResult(currentPracticeWords[currentWordIndex].en, false);
                 }
@@ -712,13 +710,13 @@ function shooterLoop() {
 // 4. ÄÄNTÄMISHARJOITUS
 function setupPronunciation() {
     const w = currentPracticeWords[currentWordIndex];
-    document.getElementById('pronunciationPrompt').innerText = `Sano englanniksi: "${w.fi}"`;
+    document.getElementById('pronunciationPrompt').textContent = `Sano englanniksi: "${w.fi}"`;
     document.getElementById('pronunciationFeedback').style.display = 'none';
     document.getElementById('btnNextPronunciation').style.display = 'none';
     
     const btnSpeak = document.getElementById('btnSpeak');
     btnSpeak.style.display = 'inline-flex';
-    btnSpeak.innerText = "🎤 Puhu nyt";
+    btnSpeak.textContent = "🎤 Puhu nyt";
     btnSpeak.classList.remove("recording");
 }
 
@@ -734,11 +732,11 @@ function startSpeechRecognition() {
     const targetText = currentPracticeWords[currentWordIndex].en.toLowerCase().trim();
 
     btnSpeak.classList.add("recording");
-    btnSpeak.innerText = "🔴 Kuunnellaan...";
+    btnSpeak.textContent = "🔴 Kuunnellaan...";
     feedbackEl.style.display = 'block';
     feedbackEl.style.background = '#E2E8F0';
     feedbackEl.style.color = '#333';
-    feedbackEl.innerText = "Kuuntelen... Sano sana selkeästi! 👂";
+    feedbackEl.textContent = "Kuuntelen... Sano sana selkeästi! 👂";
 
     recognition.start();
 
@@ -750,14 +748,14 @@ function startSpeechRecognition() {
         if (recognizedText === targetText || recognizedText.includes(targetText)) {
             recordWordResult(currentPracticeWords[currentWordIndex].en, true);
             starsEarned++; 
-            document.getElementById('starCount').innerText = starsEarned;
+            document.getElementById('starCount').textContent = starsEarned;
             
             feedbackEl.style.background = '#DCFCE7'; 
             feedbackEl.style.color = '#15803D';
             if (confidence >= 80) {
-                feedbackEl.innerHTML = `🌟 Täydellistä! Sanoit hienosti <strong>"${targetText}"</strong>!`;
+                feedbackEl.textContent = `🌟 Täydellistä! Sanoit hienosti "${targetText}"!`;
             } else {
-                feedbackEl.innerHTML = `👍 Hienosti yritetty! Ymmärsin sanan <strong>"${targetText}"</strong>.`;
+                feedbackEl.textContent = `👍 Hienosti yritetty! Ymmärsin sanan "${targetText}".`;
             }
             btnSpeak.style.display = 'none';
             document.getElementById('btnNextPronunciation').style.display = 'inline-flex';
@@ -765,7 +763,7 @@ function startSpeechRecognition() {
             recordWordResult(currentPracticeWords[currentWordIndex].en, false);
             feedbackEl.style.background = '#FEE2E2'; 
             feedbackEl.style.color = '#991B1B';
-            feedbackEl.innerHTML = `💪 Hyvä yritys! Kuulin: <em>"${recognizedText}"</em>.<br>Kokeile uudestaan tai siirry seuraavaan.`;
+            feedbackEl.textContent = `💪 Hyvä yritys! Kuulin: "${recognizedText}". Kokeile uudestaan tai siirry seuraavaan.`;
             document.getElementById('btnNextPronunciation').style.display = 'inline-flex';
         }
     };
@@ -774,23 +772,23 @@ function startSpeechRecognition() {
         feedbackEl.style.background = '#FEF3C7'; 
         feedbackEl.style.color = '#B45309';
         if (event.error === 'no-speech') {
-            feedbackEl.innerHTML = "En kuullut mitään. Yritä painaa nappia uudelleen ja puhua kovempaa! 🎤";
+            feedbackEl.textContent = "En kuullut mitään. Yritä painaa nappia uudelleen ja puhua kovempaa! 🎤";
         } else {
-            feedbackEl.innerHTML = "Virhe tunnistuksessa. Varmista, että selaimella on mikrofonin luvat!";
+            feedbackEl.textContent = "Virhe tunnistuksessa. Varmista, että selaimella on mikrofonin luvat!";
         }
     };
 
     recognition.onend = () => {
         btnSpeak.classList.remove("recording");
         if (btnSpeak.style.display !== 'none') {
-            btnSpeak.innerText = "🎤 Yritä uudestaan";
+            btnSpeak.textContent = "🎤 Yritä uudestaan";
         }
     };
 }
 
 // --- SANASTOTILASTOT -NÄKYMÄ ---
 function openStatsView() {
-    document.getElementById('statsListName').innerText = currentListName || "Ei listaa valittu";
+    document.getElementById('statsListName').textContent = currentListName || "Ei listaa valittu";
     const tbody = document.getElementById('statsTableBody');
     tbody.innerHTML = '';
     const validWords = wordList.filter(w => w.en && w.en.trim() !== '' && w.fi && w.fi.trim() !== '');
@@ -815,9 +813,19 @@ function openStatsView() {
             else starRating = '⭐☆☆☆☆';
         }
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${w.en}</td><td>${w.fi}</td>
-            <td><span style="color:green">O: ${s.correct}</span> / <span style="color:red">V: ${s.wrong}</span></td>
-            <td>${percentStr}</td><td class="star-rating">${starRating}</td>`;
+        
+        const tdEn = document.createElement('td'); tdEn.textContent = w.en;
+        const tdFi = document.createElement('td'); tdFi.textContent = w.fi;
+        const tdScore = document.createElement('td');
+        tdScore.innerHTML = `<span style="color:green">O: ${s.correct}</span> / <span style="color:red">V: ${s.wrong}</span>`;
+        const tdPct = document.createElement('td'); tdPct.textContent = percentStr;
+        const tdStars = document.createElement('td'); tdStars.className = 'star-rating'; tdStars.textContent = starRating;
+        
+        tr.appendChild(tdEn);
+        tr.appendChild(tdFi);
+        tr.appendChild(tdScore);
+        tr.appendChild(tdPct);
+        tr.appendChild(tdStars);
         tbody.appendChild(tr);
     });
     showView('statsView');
@@ -829,20 +837,35 @@ function initFirebaseCloud() {
         if (!firebase.apps.length) firebaseApp = firebase.initializeApp(firebaseConfig); else firebaseApp = firebase.app();
         db = firebase.firestore(); isFirebaseConnected = true;
         document.getElementById('cloudStatusBadge').classList.add('online');
-        document.getElementById('cloudStatusText').innerText = "Pilvi Yhdistetty";
+        document.getElementById('cloudStatusText').textContent = "Pilvi Yhdistetty";
         loadPacksFromCloud();
     } catch (e) {
         console.error("Cloud Error:", e);
-        document.getElementById('cloudStatusText').innerText = "Offline Tila";
+        document.getElementById('cloudStatusText').textContent = "Offline Tila";
     }
 }
 
 function loadPacksFromCloud() {
     if (!isFirebaseConnected) return;
     db.collection('wordpacks').get().then(snap => {
-        const select = document.getElementById('listSelector'); select.innerHTML = '<option value="">-- Valitse sanalista --</option>';
-        if(snap.empty) { select.innerHTML = '<option value="">Ei sanalistoja pilvessä.</option>'; return; }
-        snap.forEach(doc => { const p = doc.data(); select.innerHTML += `<option value="${doc.id}">${p.name} (${p.words.length} sanaa)</option>`; });
+        const select = document.getElementById('listSelector'); 
+        select.innerHTML = '';
+        const defaultOpt = document.createElement('option');
+        defaultOpt.value = "";
+        defaultOpt.textContent = "-- Valitse sanalista --";
+        select.appendChild(defaultOpt);
+
+        if(snap.empty) { 
+            defaultOpt.textContent = "Ei sanalistoja pilvessä."; 
+            return; 
+        }
+        snap.forEach(doc => { 
+            const p = doc.data(); 
+            const opt = document.createElement('option');
+            opt.value = doc.id;
+            opt.textContent = `${p.name} (${p.words.length} sanaa)`;
+            select.appendChild(opt);
+        });
     });
 }
 
@@ -857,11 +880,11 @@ function downloadSelectedWordpack() {
             wordList = data.words || [];
             currentListName = data.name;
             renderWordsTable();
-            document.getElementById('activeListName').innerText = `Aktiivinen lista: ${currentListName} (${wordList.length} sanaa)`;
-            document.getElementById('leaderboardListName').innerText = currentListName;
+            document.getElementById('activeListName').textContent = `Aktiivinen lista: ${currentListName} (${wordList.length} sanaa)`;
+            document.getElementById('leaderboardListName').textContent = currentListName;
             loadLeaderboardForCurrentList();
             
-            updateQuestUI(); // Päivitetään reitti ladatulle listalle
+            updateQuestUI();
             alert(`Sanalista "${currentListName}" ladattu! Voit aloittaa harjoittelun.`);
         }
     });
@@ -869,7 +892,8 @@ function downloadSelectedWordpack() {
 
 function uploadWordsToFirebase() {
     if (!isFirebaseConnected) { alert("Yhteyttä pilveen ei ole. Yritä uudelleen myöhemmin."); return; }
-    const name = document.getElementById('newWordpackName').value.trim();
+    const nameInput = document.getElementById('newWordpackName');
+    const name = nameInput.value.trim();
     if (!name) { alert('Anna sanalistalle nimi ennen tallennusta!'); return; }
     
     syncTableToWordList();
@@ -879,15 +903,15 @@ function uploadWordsToFirebase() {
     db.collection('wordpacks').add(packData).then(() => {
         const msg = document.getElementById('saveStatusMsg');
         msg.style.display = 'block'; msg.style.background = '#DCFCE7'; msg.style.color = '#15803D';
-        msg.innerHTML = `Sanalista tallennettu!`;
+        msg.textContent = `Sanalista tallennettu!`;
         currentListName = name;
-        document.getElementById('activeListName').innerText = `Aktiivinen lista: ${currentListName} (${validWords.length} sanaa)`;
-        document.getElementById('leaderboardListName').innerText = currentListName;
+        document.getElementById('activeListName').textContent = `Aktiivinen lista: ${currentListName} (${validWords.length} sanaa)`;
+        document.getElementById('leaderboardListName').textContent = currentListName;
         
         loadPacksFromCloud(); 
         loadLeaderboardForCurrentList();
         updateQuestUI();
-        setTimeout(() => { msg.style.display = 'none'; document.getElementById('newWordpackName').value = ''; showView('menuView'); }, 3000);
+        setTimeout(() => { msg.style.display = 'none'; nameInput.value = ''; showView('menuView'); }, 3000);
     }).catch(err => { alert("Virhe tallennuksessa: " + err.message); });
 }
 
@@ -905,7 +929,7 @@ function saveScoreAndReturn() {
             listName: currentListName,
             stars: starsEarned,
             score: finalGameScore,
-            time: document.getElementById('timerDisplay').innerText,
+            time: document.getElementById('timerDisplay').textContent,
             date: firebase.firestore.FieldValue.serverTimestamp()
         }).then(() => { loadLeaderboardForCurrentList(); });
     }
@@ -926,15 +950,36 @@ function loadLeaderboardForCurrentList() {
         results.sort((a, b) => b.timeValue - a.timeValue);
         results = results.slice(0, 20);
         
-        const list = document.getElementById('historyList'); list.innerHTML = '';
-        if(results.length === 0) { list.innerHTML = '<li style="color:#888; text-align:center;">Ei vielä suorituksia tälle listalle. Ole ensimmäinen!</li>'; return; }
+        const list = document.getElementById('historyList'); 
+        list.innerHTML = '';
+        if(results.length === 0) { 
+            const li = document.createElement('li');
+            li.style.color = '#888';
+            li.style.textAlign = 'center';
+            li.textContent = 'Ei vielä suorituksia tälle listalle. Ole ensimmäinen!';
+            list.appendChild(li); 
+            return; 
+        }
         
         results.forEach(d => {
             const scoreText = d.score !== undefined ? ` | 🏅 ${d.score} p.` : '';
-            list.innerHTML += `<li class="history-item">
-                <div><strong>${d.name}</strong> <small style="color:#666;">- ${d.type}</small></div>
-                <div><span style="color:#F59E0B; font-weight:bold;">${d.stars}⭐</span>${scoreText} | ⏱️ ${d.time}</div>
-            </li>`;
+            const li = document.createElement('li');
+            li.className = 'history-item';
+            
+            const divInfo = document.createElement('div');
+            const strongName = document.createElement('strong'); strongName.textContent = d.name;
+            const smallType = document.createElement('small'); smallType.style.color = '#666'; smallType.textContent = ` - ${d.type}`;
+            divInfo.appendChild(strongName);
+            divInfo.appendChild(smallType);
+            
+            const divResult = document.createElement('div');
+            const spanStars = document.createElement('span'); spanStars.style.cssText = 'color:#F59E0B; font-weight:bold;'; spanStars.textContent = `${d.stars}⭐`;
+            divResult.appendChild(spanStars);
+            divResult.append(`${scoreText} | ⏱️ ${d.time}`);
+            
+            li.appendChild(divInfo);
+            li.appendChild(divResult);
+            list.appendChild(li);
         });
     }).catch(err => console.error("Virhe tulostaulukon haussa:", err));
 }
@@ -945,9 +990,28 @@ function renderWordsTable() {
     const tbody = document.getElementById('wordsTableBody'); tbody.innerHTML = '';
     if(wordList.length === 0) addTableRows(5);
     wordList.forEach((w, i) => {
-        tbody.innerHTML += `<tr><td>${i+1}</td>
-        <td><input type="text" id="en_${i}" value="${w.en}"></td>
-        <td><input type="text" id="fi_${i}" value="${w.fi}"></td></tr>`;
+        const tr = document.createElement('tr');
+        
+        const tdNum = document.createElement('td'); tdNum.textContent = i + 1;
+        
+        const tdEn = document.createElement('td');
+        const inputEn = document.createElement('input');
+        inputEn.type = 'text';
+        inputEn.id = `en_${i}`;
+        inputEn.value = w.en;
+        tdEn.appendChild(inputEn);
+        
+        const tdFi = document.createElement('td');
+        const inputFi = document.createElement('input');
+        inputFi.type = 'text';
+        inputFi.id = `fi_${i}`;
+        inputFi.value = w.fi;
+        tdFi.appendChild(inputFi);
+        
+        tr.appendChild(tdNum);
+        tr.appendChild(tdEn);
+        tr.appendChild(tdFi);
+        tbody.appendChild(tr);
     });
 }
 function syncTableToWordList() {
