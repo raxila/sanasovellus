@@ -1,0 +1,47 @@
+name: Julkaise GitHub Pagesiin
+
+on:
+  push:
+    branches: [ "main" ]   # Vaihda tähän oman oletushaarasi nimi jos se ei ole "main"
+  workflow_dispatch:        # Sallii myös manuaalisen käynnistyksen Actions-välilehdeltä
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Hae koodi
+        uses: actions/checkout@v4
+
+      - name: Korvaa API-avaimen paikkamerkki oikealla arvolla
+        env:
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+        run: |
+          if [ -z "$GOOGLE_API_KEY" ]; then
+            echo "VIRHE: repo secret GOOGLE_API_KEY puuttuu tai on tyhjä." >&2
+            exit 1
+          fi
+          sed -i "s|__FIREBASE_API_KEY__|${GOOGLE_API_KEY}|g" index.html
+
+      - name: Valmistele GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Pakkaa julkaistava sisältö
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+      - name: Julkaise GitHub Pagesiin
+        id: deployment
+        uses: actions/deploy-pages@v4
