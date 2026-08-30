@@ -55,105 +55,105 @@
 <div id="app">
     <!-- 0. LOGIN VIEW -->
     <div id="loginView" class="view active">
-        <h1>👋 Tervetuloa!</h1>
+        <h1>ðŸ‘‹ Tervetuloa!</h1>
         <div style="background:#F1F5F9; padding:20px; border-radius:12px; text-align:center; max-width: 400px; margin: 40px auto;">
-            <p style="font-weight:bold; font-size:1.1rem;">Kirjaudu sisään koulun tai sallitulla Google-tilillä:</p>
+            <p style="font-weight:bold; font-size:1.1rem;">Kirjaudu sisÃ¤Ã¤n koulun tai sallitulla Google-tilillÃ¤:</p>
             <button class="btn btn-primary" onclick="loginWithGoogle()" style="width:100%; margin-top:15px; font-size:1.1rem; padding:12px;">
-                🔑 Kirjaudu Google-tilillä
+                ðŸ”‘ Kirjaudu Google-tilillÃ¤
             </button>
             <div id="loginErrorMsg" class="status-msg" style="margin-top:15px; font-size:0.9rem;"></div>
         </div>
     </div>
     
-    <!-- PÄÄNAVIGOINTI -->
+    <!-- PÃ„Ã„NAVIGOINTI -->
     <div id="mainNav" style="display:none;">
         <div class="nav-bar">
             <div style="display:flex; align-items:center; gap:10px;">
-                <button class="btn btn-secondary" onclick="showView('menuView')">🏠 Valikko</button>
-                <div class="user-chip">👤 <span id="displayUserName">Pelaaja</span></div>
-                <span id="cloudStatusBadge" class="cloud-badge"><span class="badge-dot"></span> <span id="cloudStatusText">Yhdistetään...</span></span>
+                <button class="btn btn-secondary" onclick="showView('menuView')">ðŸ  Valikko</button>
+                <div class="user-chip">ðŸ‘¤ <span id="displayUserName">Pelaaja</span></div>
+                <span id="cloudStatusBadge" class="cloud-badge"><span class="badge-dot"></span> <span id="cloudStatusText">YhdistetÃ¤Ã¤n...</span></span>
             </div>
             <div>
-                <button class="btn btn-primary" onclick="openStatsView()">📊 Tilastot</button>
-                <button class="btn btn-dark" onclick="showView('settingsView')">➕ Lisää lista</button>
+                <button class="btn btn-primary" onclick="openStatsView()">ðŸ“Š Tilastot</button>
+                <button class="btn btn-dark" onclick="showView('settingsView')">âž• LisÃ¤Ã¤ lista</button>
                 <button class="btn btn-danger" onclick="logoutUser()" style="padding: 6px 12px; font-size: 0.9rem;">Kirjaudu ulos</button>
             </div>
         </div>
     </div>
     
-    <!-- PELIN YLÄPALKKI -->
+    <!-- PELIN YLÃ„PALKKI -->
     <div id="gameScoreBar" class="score-bar" style="display:none;">
-        <div>⭐ Tähdet: <span id="starCount">0</span></div>
-        <div>⏱️ Aika: <span id="timerDisplay">00:00</span></div>
-        <div>📝 Tehtävä: <span id="progressDisplay">1/5</span></div>
+        <div>â­ TÃ¤hdet: <span id="starCount">0</span></div>
+        <div>â±ï¸ Aika: <span id="timerDisplay">00:00</span></div>
+        <div>ðŸ“ TehtÃ¤vÃ¤: <span id="progressDisplay">1/5</span></div>
     </div>
     
     <!-- 1. MAIN MENU VIEW -->
     <div id="menuView" class="view">
-        <h1 style="margin-bottom: 5px;">🌟 Englannin Sanakoe 🌟</h1>
-        <p style="text-align:center; color:#666; margin-top:0;">Olet kirjautuneena nimellä: <strong id="welcomeNameText"></strong></p>
+        <h1 style="margin-bottom: 5px;">ðŸŒŸ Englannin Sanakoe ðŸŒŸ</h1>
+        <p style="text-align:center; color:#666; margin-top:0;">Olet kirjautuneena nimellÃ¤: <strong id="welcomeNameText"></strong></p>
 
         <!-- SEIKKAILUREITTI-KORTTI -->
         <div class="quest-card">
-            <div id="questTitle" class="quest-title">Matka Taikalinnaan 🏰</div>
-            <div id="questStatus" class="quest-status">Valitse sanalista nähdäksesi seikkailusi!</div>
+            <div id="questTitle" class="quest-title">Matka Taikalinnaan ðŸ°</div>
+            <div id="questStatus" class="quest-status">Valitse sanalista nÃ¤hdÃ¤ksesi seikkailusi!</div>
             
             <div class="quest-track">
                 <div id="questFill" class="quest-fill"></div>
                 
                 <!-- Etapit -->
                 <div class="quest-milestones">
-                    <span title="Leiri (Aloitus)">⛺</span>
-                    <span title="Metsä (3 peliä)">🌲</span>
-                    <span title="Silta (7 peliä)">🌉</span>
-                    <span title="Vuori (12 peliä)">⛰️</span>
-                    <span title="Linna (18 peliä)">🏰</span>
+                    <span title="Leiri (Aloitus)">â›º</span>
+                    <span title="MetsÃ¤ (3 peliÃ¤)">ðŸŒ²</span>
+                    <span title="Silta (7 peliÃ¤)">ðŸŒ‰</span>
+                    <span title="Vuori (12 peliÃ¤)">â›°ï¸</span>
+                    <span title="Linna (18 peliÃ¤)">ðŸ°</span>
                 </div>
                 
                 <!-- Pelaajan hahmo -->
-                <div id="questPlayer" class="quest-player">🧙‍♂️</div>
+                <div id="questPlayer" class="quest-player">ðŸ§™â€â™‚ï¸</div>
             </div>
         </div>
 
         <div style="background:#F1F5F9; padding:15px; border-radius:12px; margin-bottom:20px; text-align:center;">
             <label style="font-weight:bold; display:block; margin-bottom:8px;">1. Valitse opeteltava sanalista:</label>
             <select id="listSelector">
-                <option value="">Ladataan sanalistoja pilvestä...</option>
+                <option value="">Ladataan sanalistoja pilvestÃ¤...</option>
             </select>
-            <button class="btn btn-dark" onclick="downloadSelectedWordpack()" style="font-size:0.9rem; padding:8px 15px;">⬇️ Lataa valittu lista</button>
+            <button class="btn btn-dark" onclick="downloadSelectedWordpack()" style="font-size:0.9rem; padding:8px 15px;">â¬‡ï¸ Lataa valittu lista</button>
             <p style="margin:5px 0 0 0; color:#15803D; font-weight:bold; font-size:0.9rem;" id="activeListName">Aktiivinen lista: Ei valittu</p>
         </div>
         
         <label style="font-weight:bold; display:block; margin-bottom:8px; text-align:center;">2. Valitse pelimuoto:</label>
         <div style="display:flex; flex-direction:column; gap:12px; margin-bottom: 25px;">
-            <button class="btn btn-primary" onclick="startPractice('cards')">🎴 Käännettävät Kortit</button>
-            <button class="btn btn-success" onclick="startPractice('spelling')">✏️ Kirjoita Sanat</button>
-            <button class="btn btn-secondary" onclick="startPractice('shooter')">🚀 Kirjainjahti (Ammuntapeli)</button>
-            <button class="btn btn-dark" onclick="startPractice('pronunciation')">🎤 Ääntämisharjoitus (Puhe)</button>
+            <button class="btn btn-primary" onclick="startPractice('cards')">ðŸŽ´ KÃ¤Ã¤nnettÃ¤vÃ¤t Kortit</button>
+            <button class="btn btn-success" onclick="startPractice('spelling')">âœï¸ Kirjoita Sanat</button>
+            <button class="btn btn-secondary" onclick="startPractice('shooter')">ðŸš€ Kirjainjahti (Ammuntapeli)</button>
+            <button class="btn btn-dark" onclick="startPractice('pronunciation')">ðŸŽ¤ Ã„Ã¤ntÃ¤misharjoitus (Puhe)</button>
         </div>
         <div style="margin-top:30px;">
-            <h3>🏆 Tulostaulukko: <span id="leaderboardListName" style="color:var(--secondary-color);">Valitse lista ensin</span></h3>
-            <ul id="historyList" class="history-list"><li style="color:#888; text-align:center;">Valitse lista ylhäältä nähdäksesi tulokset.</li></ul>
+            <h3>ðŸ† Tulostaulukko: <span id="leaderboardListName" style="color:var(--secondary-color);">Valitse lista ensin</span></h3>
+            <ul id="historyList" class="history-list"><li style="color:#888; text-align:center;">Valitse lista ylhÃ¤Ã¤ltÃ¤ nÃ¤hdÃ¤ksesi tulokset.</li></ul>
         </div>
     </div>
 
     <!-- 2. FLASHCARD GAME -->
     <div id="cardsView" class="view">
-        <h2>🎴 Käännettävät kortit</h2>
+        <h2>ðŸŽ´ KÃ¤Ã¤nnettÃ¤vÃ¤t kortit</h2>
         <div class="card-container" onclick="flipCard()"><div id="flashCard" class="card"><div id="cardFront" class="card-front">Word</div><div id="cardBack" class="card-back">Sana</div></div></div>
         <div style="display:flex; justify-content:center; gap:15px; margin-top:15px;">
-            <button class="btn btn-danger" onclick="answerCard(false)">❌ En osannut</button>
-            <button class="btn btn-success" onclick="answerCard(true)">⭐ Osasin! (+1 Tähti)</button>
+            <button class="btn btn-danger" onclick="answerCard(false)">âŒ En osannut</button>
+            <button class="btn btn-success" onclick="answerCard(true)">â­ Osasin! (+1 TÃ¤hti)</button>
         </div>
     </div>
 
     <!-- 3. SPELLING GAME -->
     <div id="spellingView" class="view">
-        <h2>✏️ Kirjoita sana oikein</h2>
-        <p style="text-align:center; font-size:1.3rem; font-weight:bold; margin-bottom:15px;" id="spellingPrompt">Käännä englanniksi:</p>
+        <h2>âœï¸ Kirjoita sana oikein</h2>
+        <p style="text-align:center; font-size:1.3rem; font-weight:bold; margin-bottom:15px;" id="spellingPrompt">KÃ¤Ã¤nnÃ¤ englanniksi:</p>
         
         <form onsubmit="checkSpelling(event)">
-            <label style="font-weight:bold; display:block; margin-bottom:5px;">Kirjoita vastaus tähän:</label>
+            <label style="font-weight:bold; display:block; margin-bottom:5px;">Kirjoita vastaus tÃ¤hÃ¤n:</label>
             <input type="text" id="spellingInput" placeholder="Kirjoita sana englanniksi..." autocomplete="off">
             
             <div id="spellingFeedback" class="status-msg"></div>
@@ -161,69 +161,69 @@
             
             <div style="display:flex; justify-content:space-between; margin-top:12px;">
                 <div style="display:flex; gap:10px;">
-                    <button type="button" class="btn btn-secondary" onclick="giveSpellingHint()" id="hintBtn">💡 Vinkki</button>
-                    <button type="button" class="btn btn-primary" onclick="speakCurrentWord()">🔊 Kuuntele</button>
+                    <button type="button" class="btn btn-secondary" onclick="giveSpellingHint()" id="hintBtn">ðŸ’¡ Vinkki</button>
+                    <button type="button" class="btn btn-primary" onclick="speakCurrentWord()">ðŸ”Š Kuuntele</button>
                 </div>
-                <button type="submit" class="btn btn-success">Vastaa ➔</button>
+                <button type="submit" class="btn btn-success">Vastaa âž”</button>
             </div>
         </form>
     </div>
 
     <!-- 4. SHOOTER GAME -->
     <div id="shooterView" class="view">
-        <h2>🚀 Kirjainjahti</h2>
-        <p style="text-align:center;">Tähtää NUOLILLA, ammu VÄLILYÖNNILLÄ oikeat kirjaimet järjestäen!</p>
+        <h2>ðŸš€ Kirjainjahti</h2>
+        <p style="text-align:center;">TÃ¤htÃ¤Ã¤ NUOLILLA, ammu VÃ„LILYÃ–NNILLÃ„ oikeat kirjaimet jÃ¤rjestÃ¤en!</p>
         <div style="display:flex; justify-content:space-between; align-items:center; background:#E2E8F0; padding:8px 15px; border-radius:10px; margin-bottom:10px;">
             <div style="font-size:1.2rem; font-weight:bold; display:flex; align-items:center; gap:10px;">
-                <span>Käännä: <span id="shooterTargetWord" style="color:var(--primary-color);">SANA</span></span>
-                <button type="button" class="btn btn-primary" style="padding: 4px 10px; font-size: 0.9rem;" onclick="speakCurrentWord()">🔊</button>
+                <span>KÃ¤Ã¤nnÃ¤: <span id="shooterTargetWord" style="color:var(--primary-color);">SANA</span></span>
+                <button type="button" class="btn btn-primary" style="padding: 4px 10px; font-size: 0.9rem;" onclick="speakCurrentWord()">ðŸ”Š</button>
             </div>
-            <div style="font-size:1.2rem; font-weight:bold;">🎯 Pisteet: <span id="shooterScore" style="color:var(--secondary-color);">0</span></div>
+            <div style="font-size:1.2rem; font-weight:bold;">ðŸŽ¯ Pisteet: <span id="shooterScore" style="color:var(--secondary-color);">0</span></div>
         </div>
-        <div style="text-align:center; font-size:1.1rem; margin-bottom:10px;">Kerätty: <span id="shooterCollectedText" style="color:var(--success-color); letter-spacing:3px; font-weight:bold;">_ _ _</span></div>
+        <div style="text-align:center; font-size:1.1rem; margin-bottom:10px;">KerÃ¤tty: <span id="shooterCollectedText" style="color:var(--success-color); letter-spacing:3px; font-weight:bold;">_ _ _</span></div>
         <canvas id="gameCanvas" width="600" height="350"></canvas>
     </div>
     
     <!-- 5. PRONUNCIATION GAME -->
     <div id="pronunciationView" class="view">
-        <h2>🎤 Ääntämisharjoitus</h2>
+        <h2>ðŸŽ¤ Ã„Ã¤ntÃ¤misharjoitus</h2>
         <p style="text-align:center; font-size:1.3rem; font-weight:bold; margin-bottom:15px;" id="pronunciationPrompt">Ladataan...</p>
         
         <div style="display:flex; justify-content:center; gap:15px; margin-bottom: 20px;">
-            <button class="btn btn-primary" onclick="speakCurrentWord()">🔊 Kuuntele malli</button>
-            <button class="btn btn-secondary" id="btnSpeak" onclick="startSpeechRecognition()">🎤 Puhu nyt</button>
+            <button class="btn btn-primary" onclick="speakCurrentWord()">ðŸ”Š Kuuntele malli</button>
+            <button class="btn btn-secondary" id="btnSpeak" onclick="startSpeechRecognition()">ðŸŽ¤ Puhu nyt</button>
         </div>
         
         <div id="pronunciationFeedback" class="status-msg" style="padding:20px; font-size:1.2rem;"></div>
         
         <div style="text-align:center; margin-top:20px;">
-            <button class="btn btn-success" id="btnNextPronunciation" style="display:none;" onclick="nextWord()">Seuraava sana ➔</button>
+            <button class="btn btn-success" id="btnNextPronunciation" style="display:none;" onclick="nextWord()">Seuraava sana âž”</button>
         </div>
     </div>
 
     <!-- 6. SUMMARY VIEW -->
     <div id="summaryView" class="view">
-        <h2>🎉 Hienoa työtä, <span id="summaryUserName"></span>!</h2>
+        <h2>ðŸŽ‰ Hienoa tyÃ¶tÃ¤, <span id="summaryUserName"></span>!</h2>
         <div style="text-align:center; font-size:1.5rem; margin: 20px 0;">
-            <p>Tähdet: <strong><span id="finalStars">0</span> / 5</strong> ⭐</p>
+            <p>TÃ¤hdet: <strong><span id="finalStars">0</span> / 5</strong> â­</p>
             <p>Aika: <strong><span id="finalTime">00:00</span></strong></p>
-            <p style="color: var(--primary-color); font-size: 1.8rem; margin-top: 15px;">🏅 Kokonaispisteet: <strong><span id="finalTotalScore">0</span></strong></p>
+            <p style="color: var(--primary-color); font-size: 1.8rem; margin-top: 15px;">ðŸ… Kokonaispisteet: <strong><span id="finalTotalScore">0</span></strong></p>
             
             <div id="questAwardNotice" style="font-size:1.1rem; font-weight:bold; color:#4F46E5; margin-top:15px; display:none; background:#EEF2FF; padding:15px; border-radius:12px; border:2px solid #C7D2FE;">
-                🧙‍♂️ Etenit polulla kohti Taikalinnaan! (Vähintään 3/5 oikein)
+                ðŸ§™â€â™‚ï¸ Etenit polulla kohti Taikalinnaan! (VÃ¤hintÃ¤Ã¤n 3/5 oikein)
             </div>
         </div>
         <div style="text-align:center;">
-            <p style="color:#666; margin-bottom:20px;">Tuloksesi on tallennettu automaattisesti pilveen nimelläsi.</p>
-            <button class="btn btn-success" onclick="saveScoreAndReturn()">Palaa valikkoon ➔</button>
+            <p style="color:#666; margin-bottom:20px;">Tuloksesi on tallennettu automaattisesti pilveen nimellÃ¤si.</p>
+            <button class="btn btn-success" onclick="saveScoreAndReturn()">Palaa valikkoon âž”</button>
         </div>
     </div>
 
     <!-- 7. ADD WORDLIST VIEW -->
     <div id="settingsView" class="view">
-        <h2>➕ Sanalistan lisääminen</h2>
+        <h2>âž• Sanalistan lisÃ¤Ã¤minen</h2>
         <p style="text-align:center; color:#666;">Kirjoita sanat alla olevaan taulukkoon, anna listalle nimi ja tallenna se kaikkien saataville.</p>
-        <input type="text" id="newWordpackName" placeholder="Anna listalle nimi (esim. Viikko 42 tai Eläimet)" style="border: 2px solid var(--secondary-color); font-weight:bold;">
+        <input type="text" id="newWordpackName" placeholder="Anna listalle nimi (esim. Viikko 42 tai ElÃ¤imet)" style="border: 2px solid var(--secondary-color); font-weight:bold;">
         
         <div id="saveStatusMsg" class="status-msg"></div>
         <div class="table-container">
@@ -232,14 +232,14 @@
                 <tbody id="wordsTableBody"></tbody>
             </table>
         </div>
-        <button class="btn btn-secondary" onclick="addTableRows(5)">➕ Lisää 5 riviä</button>
-        <button class="btn btn-success" onclick="uploadWordsToFirebase()">☁️ Tallenna tämä lista pilveen</button>
+        <button class="btn btn-secondary" onclick="addTableRows(5)">âž• LisÃ¤Ã¤ 5 riviÃ¤</button>
+        <button class="btn btn-success" onclick="uploadWordsToFirebase()">â˜ï¸ Tallenna tÃ¤mÃ¤ lista pilveen</button>
     </div>
 
     <!-- 8. WORD STATS VIEW -->
     <div id="statsView" class="view">
-        <h2>📊 Henkilökohtaiset Tilastot</h2>
-        <p style="text-align:center; color:#666;">Tästä näet miten hyvin <strong>sinä</strong> (<span id="statsUserNameDisplay"></span>) olet oppinut sanat.</p>
+        <h2>ðŸ“Š HenkilÃ¶kohtaiset Tilastot</h2>
+        <p style="text-align:center; color:#666;">TÃ¤stÃ¤ nÃ¤et miten hyvin <strong>sinÃ¤</strong> (<span id="statsUserNameDisplay"></span>) olet oppinut sanat.</p>
         
         <div style="margin-bottom:15px; background:#F8FAFC; padding:10px; border-radius:8px;">
             <label style="font-weight:bold;">Tarkasteltava lista:</label>
@@ -251,18 +251,18 @@
                     <tr>
                         <th>Englanti</th>
                         <th>Suomi</th>
-                        <th>Oikein / Väärin</th>
+                        <th>Oikein / VÃ¤Ã¤rin</th>
                         <th>Onnistuminen</th>
-                        <th>Tähtiluokitus</th>
+                        <th>TÃ¤htiluokitus</th>
                     </tr>
                 </thead>
                 <tbody id="statsTableBody">
-                    <tr><td colspan="5" style="text-align:center; color:#888;">Ei tilastoja vielä.</td></tr>
+                    <tr><td colspan="5" style="text-align:center; color:#888;">Ei tilastoja vielÃ¤.</td></tr>
                 </tbody>
             </table>
         </div>
         <div style="text-align:center;">
-            <button class="btn btn-secondary" onclick="showView('menuView')">🏠 Takaisin valikkoon</button>
+            <button class="btn btn-secondary" onclick="showView('menuView')">ðŸ  Takaisin valikkoon</button>
         </div>
     </div>
 </div>
@@ -270,7 +270,7 @@
 <script>
 // --- FIREBASE CONFIG ---
 const firebaseConfig = {
-    apiKey: "",
+    apiKey: "__FIREBASE_API_KEY__",
     authDomain: "kouluharjoituksia.firebaseapp.com",
     projectId: "kouluharjoituksia",
     storageBucket: "kouluharjoituksia.firebasestorage.app",
@@ -292,7 +292,7 @@ let isFirebaseConnected = false;
 let appStats = JSON.parse(localStorage.getItem('vocab_app_stats') || '{}');
 let userListProgress = JSON.parse(localStorage.getItem('vocab_list_progress') || '{}');
 
-// --- ÄÄNISYNTEESI (TTS) ---
+// --- Ã„Ã„NISYNTEESI (TTS) ---
 function speakCurrentWord() {
     if (!currentPracticeWords[currentWordIndex]) return;
     const wordEn = currentPracticeWords[currentWordIndex].en;
@@ -302,7 +302,7 @@ function speakCurrentWord() {
         utterance.rate = 0.85; 
         window.speechSynthesis.speak(utterance);
     } else {
-        alert("Selaimesi ei tue ääneen lukemista.");
+        alert("Selaimesi ei tue Ã¤Ã¤neen lukemista.");
     }
 }
 
@@ -314,18 +314,19 @@ window.onload = function() {
     updateQuestUI();
 };
 
-// --- SEIKKAILU / TASOJÄRJESTELMÄ (Käyttäjä & Sanalista -kohtainen) ---
+// --- SEIKKAILU / TASOJÃ„RJESTELMÃ„ (KÃ¤yttÃ¤jÃ¤ & Sanalista -kohtainen) ---
+// Avaimena kÃ¤ytetÃ¤Ã¤n uid:tÃ¤ (pysyvÃ¤) eikÃ¤ nÃ¤yttÃ¶nimeÃ¤ (voi muuttua tai olla sama kahdella kÃ¤yttÃ¤jÃ¤llÃ¤).
 function getCurrentListProgress() {
-    if (!currentUser || !currentListName) return 0;
-    if (!userListProgress[currentUser]) return 0;
-    return userListProgress[currentUser][currentListName] || 0;
+    if (!currentUserId || !currentListName) return 0;
+    if (!userListProgress[currentUserId]) return 0;
+    return userListProgress[currentUserId][currentListName] || 0;
 }
 
 function incrementListProgress() {
-    if (!currentUser || !currentListName) return;
-    if (!userListProgress[currentUser]) userListProgress[currentUser] = {};
-    let current = userListProgress[currentUser][currentListName] || 0;
-    userListProgress[currentUser][currentListName] = current + 1;
+    if (!currentUserId || !currentListName) return;
+    if (!userListProgress[currentUserId]) userListProgress[currentUserId] = {};
+    let current = userListProgress[currentUserId][currentListName] || 0;
+    userListProgress[currentUserId][currentListName] = current + 1;
     localStorage.setItem('vocab_list_progress', JSON.stringify(userListProgress));
 }
 
@@ -336,7 +337,7 @@ function updateQuestUI() {
     const playerEl = document.getElementById('questPlayer');
 
     if (!currentUser || !currentListName) {
-        titleEl.textContent = "Matka Taikalinnaan 🏰";
+        titleEl.textContent = "Matka Taikalinnaan ðŸ°";
         statusEl.textContent = "Valitse sanalista aloittaaksesi seikkailusi!";
         fillEl.style.width = '0%';
         playerEl.style.left = '0%';
@@ -348,18 +349,18 @@ function updateQuestUI() {
     
     titleEl.textContent = `Seikkailu listalla: ${currentListName}`;
     
-    let locationName = "Leirissä";
+    let locationName = "LeirissÃ¤";
     let nextGoal = 3;
     
     if (passed >= 18) { locationName = "Taikalinnassa! Olet mestari!"; }
-    else if (passed >= 12) { locationName = "Lohikäärmeen vuorella"; nextGoal = 18; }
+    else if (passed >= 12) { locationName = "LohikÃ¤Ã¤rmeen vuorella"; nextGoal = 18; }
     else if (passed >= 7) { locationName = "Peikkosillalla"; nextGoal = 12; }
-    else if (passed >= 3) { locationName = "Synkässä metsässä"; nextGoal = 7; }
+    else if (passed >= 3) { locationName = "SynkÃ¤ssÃ¤ metsÃ¤ssÃ¤"; nextGoal = 7; }
     
     if (passed >= 18) {
-        statusEl.textContent = `Olet saavuttanut linnan tällä listalla! (${passed} peliä pelattu)`;
+        statusEl.textContent = `Olet saavuttanut linnan tÃ¤llÃ¤ listalla! (${passed} peliÃ¤ pelattu)`;
     } else {
-        statusEl.textContent = `Olet ${locationName}. Seuraava etappi: ${passed} / ${nextGoal} peliä (väh. 3⭐)`;
+        statusEl.textContent = `Olet ${locationName}. Seuraava etappi: ${passed} / ${nextGoal} peliÃ¤ (vÃ¤h. 3â­)`;
     }
 
     const progressPct = Math.min(100, (passed / maxMilestone) * 100);
@@ -368,17 +369,27 @@ function updateQuestUI() {
 }
 
 // --- KIRJAUTUMINEN JA GOOGLE AUTH ---
+// Yksi ainoa paikka sallituille tileille. Firestore-sÃ¤Ã¤nnÃ¶issÃ¤ on sama lista
+// palvelinpuolen suojana - jos muutat tÃ¤tÃ¤, muista pÃ¤ivittÃ¤Ã¤ myÃ¶s rules-tiedosto.
+const ALLOWED_GMAIL_ACCOUNTS = [
+    'hannu.t.kari@gmail.com',
+    'leevi.r.kari@gmail.com',
+    'sanna.tuikkanen@gmail.com'
+];
+function isEmailAllowed(email) {
+    const normalized = (email || '').toLowerCase();
+    return normalized.endsWith('@edu.parkano.fi') || ALLOWED_GMAIL_ACCOUNTS.includes(normalized);
+}
+
+let currentUserId = '';
+
 function checkExistingLogin() {
     firebase.auth().onAuthStateChanged((user) => {
         if (user) {
             const email = user.email.toLowerCase();
-            const allowedGmailAccounts = [
-                'hannu.t.kari@gmail.com',
-                'leevi.r.kari@gmail.com',
-                'sanna.tuikkanen@gmail.com'
-            ];
-            
-            if (email.endsWith('@edu.parkano.fi') || allowedGmailAccounts.includes(email)) {
+
+            if (isEmailAllowed(email)) {
+                currentUserId = user.uid;
                 currentUser = user.displayName || user.email.split('@')[0];
                 document.getElementById('displayUserName').textContent = currentUser;
                 document.getElementById('welcomeNameText').textContent = currentUser;
@@ -408,16 +419,8 @@ function loginWithGoogle() {
             const user = result.user;
             const email = user.email.toLowerCase();
 
-            const allowedGmailAccounts = [
-                'hannu.t.kari@gmail.com',
-                'leevi.r.kari@gmail.com',
-                'sanna.tuikkanen@gmail.com'
-            ];
-
-            const isEduAddress = email.endsWith('@edu.parkano.fi');
-            const isAllowedGmail = allowedGmailAccounts.includes(email);
-
-            if (isEduAddress || isAllowedGmail) {
+            if (isEmailAllowed(email)) {
+                currentUserId = user.uid;
                 currentUser = user.displayName || user.email.split('@')[0];
                 document.getElementById('displayUserName').textContent = currentUser;
                 document.getElementById('welcomeNameText').textContent = currentUser;
@@ -432,18 +435,19 @@ function loginWithGoogle() {
                 errorEl.style.display = 'block';
                 errorEl.style.background = '#FEE2E2';
                 errorEl.style.color = '#991B1B';
-                errorEl.textContent = `Pääsy evätty! Osoitteella ${email} ei ole käyttöoikeutta.`;
+                errorEl.textContent = `PÃ¤Ã¤sy evÃ¤tty! Osoitteella ${email} ei ole kÃ¤yttÃ¶oikeutta.`;
             }
         })
         .catch((error) => {
             console.error("Kirjautumisvirhe:", error);
-            alert("Kirjautuminen epäonnistui: " + error.message);
+            alert("Kirjautuminen epÃ¤onnistui: " + error.message);
         });
 }
 
 function logoutUser() {
     firebase.auth().signOut().then(() => {
         currentUser = ''; 
+        currentUserId = '';
         currentListName = ''; 
         wordList = [];
         document.getElementById('mainNav').style.display = 'none';
@@ -452,12 +456,12 @@ function logoutUser() {
 }
 
 function recordWordResult(wordEn, isCorrect) {
-    if (!wordEn || !currentUser || !currentListName) return;
-    if (!appStats[currentUser]) appStats[currentUser] = {};
-    if (!appStats[currentUser][currentListName]) appStats[currentUser][currentListName] = {};
-    if (!appStats[currentUser][currentListName][wordEn]) appStats[currentUser][currentListName][wordEn] = { correct: 0, wrong: 0 };
-    if (isCorrect) appStats[currentUser][currentListName][wordEn].correct++;
-    else appStats[currentUser][currentListName][wordEn].wrong++;
+    if (!wordEn || !currentUserId || !currentListName) return;
+    if (!appStats[currentUserId]) appStats[currentUserId] = {};
+    if (!appStats[currentUserId][currentListName]) appStats[currentUserId][currentListName] = {};
+    if (!appStats[currentUserId][currentListName][wordEn]) appStats[currentUserId][currentListName][wordEn] = { correct: 0, wrong: 0 };
+    if (isCorrect) appStats[currentUserId][currentListName][wordEn].correct++;
+    else appStats[currentUserId][currentListName][wordEn].wrong++;
     localStorage.setItem('vocab_app_stats', JSON.stringify(appStats));
 }
 
@@ -477,8 +481,8 @@ function getWeightedRandomWords(count = 5) {
     if (validWords.length === 0) return [];
     let pool = validWords.map(w => {
         let stats = { correct: 0, wrong: 0 };
-        if (appStats[currentUser] && appStats[currentUser][currentListName] && appStats[currentUser][currentListName][w.en]) {
-            stats = appStats[currentUser][currentListName][w.en];
+        if (appStats[currentUserId] && appStats[currentUserId][currentListName] && appStats[currentUserId][currentListName][w.en]) {
+            stats = appStats[currentUserId][currentListName][w.en];
         }
         let weight = Math.max(0.2, 1 + (stats.wrong * 2.5) - (stats.correct * 0.5));
         return { word: w, weight: weight };
@@ -507,7 +511,7 @@ function calculateTotalScore() {
 function startPractice(type) {
     const validWords = wordList.filter(w => w.en && w.en.trim() !== '' && w.fi && w.fi.trim() !== '');
     if (validWords.length < 1) { alert('Lataa ensin jokin sanalista alasvetovalikosta!'); return; }
-    if (!currentListName) { alert('Varmista että lista on aktiivinen.'); return; }
+    if (!currentListName) { alert('Varmista ettÃ¤ lista on aktiivinen.'); return; }
     
     practiceType = type;
     currentPracticeWords = getWeightedRandomWords(5);
@@ -591,7 +595,7 @@ function setupSpelling() {
     hintUsed = false; spellingHintIdx = 0;
     const w = currentPracticeWords[currentWordIndex];
     currentSpellingWord = w.en.trim();
-    document.getElementById('spellingPrompt').textContent = `Käännä englanniksi: "${w.fi}"`;
+    document.getElementById('spellingPrompt').textContent = `KÃ¤Ã¤nnÃ¤ englanniksi: "${w.fi}"`;
     document.getElementById('spellingInput').value = '';
     document.getElementById('spellingFeedback').style.display = 'none';
     document.getElementById('spellingInput').focus();
@@ -618,14 +622,14 @@ function checkSpelling(e) {
         if(!hintUsed) { starsEarned++; } 
         
         feedbackEl.style.display = 'block'; feedbackEl.style.background = '#DCFCE7'; feedbackEl.style.color = '#15803D';
-        feedbackEl.textContent = `🎉 Oikein! Hienoa työtä!`;
+        feedbackEl.textContent = `ðŸŽ‰ Oikein! Hienoa tyÃ¶tÃ¤!`;
         document.getElementById('starCount').textContent = starsEarned;
         
         setTimeout(() => { feedbackEl.style.display = 'none'; nextWord(); }, 1200);
     } else {
         recordWordResult(currentPracticeWords[currentWordIndex].en, false);
         feedbackEl.style.display = 'block'; feedbackEl.style.background = '#FEE2E2'; feedbackEl.style.color = '#991B1B';
-        feedbackEl.textContent = `❌ Väärin! Yritä uudelleen.`; 
+        feedbackEl.textContent = `âŒ VÃ¤Ã¤rin! YritÃ¤ uudelleen.`; 
         setTimeout(() => { feedbackEl.style.display = 'none'; }, 2000);
     }
 }
@@ -636,7 +640,7 @@ let floatingTexts = [];
 function setupShooter() {
     canvas = document.getElementById('gameCanvas'); ctx = canvas.getContext('2d');
     const w = currentPracticeWords[currentWordIndex];
-    targetWord = w.en.toUpperCase().replace(/[^A-ZÅÄÖ]/g, ''); 
+    targetWord = w.en.toUpperCase().replace(/[^A-ZÃ…Ã„Ã–]/g, ''); 
     if(!targetWord) targetWord = "WORD";
     
     collected = ''; bullets = []; letters = []; floatingTexts = [];
@@ -707,7 +711,7 @@ function shooterLoop() {
     shooterAnim = requestAnimationFrame(shooterLoop);
 }
 
-// 4. ÄÄNTÄMISHARJOITUS
+// 4. Ã„Ã„NTÃ„MISHARJOITUS
 function setupPronunciation() {
     const w = currentPracticeWords[currentWordIndex];
     document.getElementById('pronunciationPrompt').textContent = `Sano englanniksi: "${w.fi}"`;
@@ -716,7 +720,7 @@ function setupPronunciation() {
     
     const btnSpeak = document.getElementById('btnSpeak');
     btnSpeak.style.display = 'inline-flex';
-    btnSpeak.textContent = "🎤 Puhu nyt";
+    btnSpeak.textContent = "ðŸŽ¤ Puhu nyt";
     btnSpeak.classList.remove("recording");
 }
 
@@ -732,11 +736,11 @@ function startSpeechRecognition() {
     const targetText = currentPracticeWords[currentWordIndex].en.toLowerCase().trim();
 
     btnSpeak.classList.add("recording");
-    btnSpeak.textContent = "🔴 Kuunnellaan...";
+    btnSpeak.textContent = "ðŸ”´ Kuunnellaan...";
     feedbackEl.style.display = 'block';
     feedbackEl.style.background = '#E2E8F0';
     feedbackEl.style.color = '#333';
-    feedbackEl.textContent = "Kuuntelen... Sano sana selkeästi! 👂";
+    feedbackEl.textContent = "Kuuntelen... Sano sana selkeÃ¤sti! ðŸ‘‚";
 
     recognition.start();
 
@@ -753,9 +757,9 @@ function startSpeechRecognition() {
             feedbackEl.style.background = '#DCFCE7'; 
             feedbackEl.style.color = '#15803D';
             if (confidence >= 80) {
-                feedbackEl.textContent = `🌟 Täydellistä! Sanoit hienosti "${targetText}"!`;
+                feedbackEl.textContent = `ðŸŒŸ TÃ¤ydellistÃ¤! Sanoit hienosti "${targetText}"!`;
             } else {
-                feedbackEl.textContent = `👍 Hienosti yritetty! Ymmärsin sanan "${targetText}".`;
+                feedbackEl.textContent = `ðŸ‘ Hienosti yritetty! YmmÃ¤rsin sanan "${targetText}".`;
             }
             btnSpeak.style.display = 'none';
             document.getElementById('btnNextPronunciation').style.display = 'inline-flex';
@@ -763,7 +767,7 @@ function startSpeechRecognition() {
             recordWordResult(currentPracticeWords[currentWordIndex].en, false);
             feedbackEl.style.background = '#FEE2E2'; 
             feedbackEl.style.color = '#991B1B';
-            feedbackEl.textContent = `💪 Hyvä yritys! Kuulin: "${recognizedText}". Kokeile uudestaan tai siirry seuraavaan.`;
+            feedbackEl.textContent = `ðŸ’ª HyvÃ¤ yritys! Kuulin: "${recognizedText}". Kokeile uudestaan tai siirry seuraavaan.`;
             document.getElementById('btnNextPronunciation').style.display = 'inline-flex';
         }
     };
@@ -772,45 +776,45 @@ function startSpeechRecognition() {
         feedbackEl.style.background = '#FEF3C7'; 
         feedbackEl.style.color = '#B45309';
         if (event.error === 'no-speech') {
-            feedbackEl.textContent = "En kuullut mitään. Yritä painaa nappia uudelleen ja puhua kovempaa! 🎤";
+            feedbackEl.textContent = "En kuullut mitÃ¤Ã¤n. YritÃ¤ painaa nappia uudelleen ja puhua kovempaa! ðŸŽ¤";
         } else {
-            feedbackEl.textContent = "Virhe tunnistuksessa. Varmista, että selaimella on mikrofonin luvat!";
+            feedbackEl.textContent = "Virhe tunnistuksessa. Varmista, ettÃ¤ selaimella on mikrofonin luvat!";
         }
     };
 
     recognition.onend = () => {
         btnSpeak.classList.remove("recording");
         if (btnSpeak.style.display !== 'none') {
-            btnSpeak.textContent = "🎤 Yritä uudestaan";
+            btnSpeak.textContent = "ðŸŽ¤ YritÃ¤ uudestaan";
         }
     };
 }
 
-// --- SANASTOTILASTOT -NÄKYMÄ ---
+// --- SANASTOTILASTOT -NÃ„KYMÃ„ ---
 function openStatsView() {
     document.getElementById('statsListName').textContent = currentListName || "Ei listaa valittu";
     const tbody = document.getElementById('statsTableBody');
     tbody.innerHTML = '';
     const validWords = wordList.filter(w => w.en && w.en.trim() !== '' && w.fi && w.fi.trim() !== '');
     if (validWords.length === 0 || !currentListName) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#888;">Lataa ensin sanalista valikosta nähdäksesi tilastot!</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#888;">Lataa ensin sanalista valikosta nÃ¤hdÃ¤ksesi tilastot!</td></tr>';
         showView('statsView'); return;
     }
     let userStats = {};
-    if (appStats[currentUser] && appStats[currentUser][currentListName]) {
-        userStats = appStats[currentUser][currentListName];
+    if (appStats[currentUserId] && appStats[currentUserId][currentListName]) {
+        userStats = appStats[currentUserId][currentListName];
     }
     validWords.forEach(w => {
         const s = userStats[w.en] || { correct: 0, wrong: 0 };
         const total = s.correct + s.wrong;
-        let percentStr = '-'; let starRating = '☆☆☆☆☆';
+        let percentStr = '-'; let starRating = 'â˜†â˜†â˜†â˜†â˜†';
         if (total > 0) {
             const pct = Math.round((s.correct / total) * 100); percentStr = pct + '%';
-            if (pct >= 90 && s.correct >= 3) starRating = '⭐⭐⭐⭐⭐';
-            else if (pct >= 75) starRating = '⭐⭐⭐⭐☆';
-            else if (pct >= 50) starRating = '⭐⭐⭐☆☆';
-            else if (pct >= 25) starRating = '⭐⭐☆☆☆';
-            else starRating = '⭐☆☆☆☆';
+            if (pct >= 90 && s.correct >= 3) starRating = 'â­â­â­â­â­';
+            else if (pct >= 75) starRating = 'â­â­â­â­â˜†';
+            else if (pct >= 50) starRating = 'â­â­â­â˜†â˜†';
+            else if (pct >= 25) starRating = 'â­â­â˜†â˜†â˜†';
+            else starRating = 'â­â˜†â˜†â˜†â˜†';
         }
         const tr = document.createElement('tr');
         
@@ -856,7 +860,7 @@ function loadPacksFromCloud() {
         select.appendChild(defaultOpt);
 
         if(snap.empty) { 
-            defaultOpt.textContent = "Ei sanalistoja pilvessä."; 
+            defaultOpt.textContent = "Ei sanalistoja pilvessÃ¤."; 
             return; 
         }
         snap.forEach(doc => { 
@@ -866,6 +870,10 @@ function loadPacksFromCloud() {
             opt.textContent = `${p.name} (${p.words.length} sanaa)`;
             select.appendChild(opt);
         });
+    }).catch(err => {
+        console.error("Sanalistojen haku epÃ¤onnistui:", err.message);
+        const select = document.getElementById('listSelector');
+        select.innerHTML = '<option value="">Virhe listojen latauksessa. YritÃ¤ myÃ¶hemmin.</option>';
     });
 }
 
@@ -887,18 +895,21 @@ function downloadSelectedWordpack() {
             updateQuestUI();
             alert(`Sanalista "${currentListName}" ladattu! Voit aloittaa harjoittelun.`);
         }
+    }).catch(err => {
+        console.error("Sanalistan lataus epÃ¤onnistui:", err.message);
+        alert("Sanalistan lataus epÃ¤onnistui. Tarkista yhteys ja yritÃ¤ uudelleen.");
     });
 }
 
 function uploadWordsToFirebase() {
-    if (!isFirebaseConnected) { alert("Yhteyttä pilveen ei ole. Yritä uudelleen myöhemmin."); return; }
+    if (!isFirebaseConnected) { alert("YhteyttÃ¤ pilveen ei ole. YritÃ¤ uudelleen myÃ¶hemmin."); return; }
     const nameInput = document.getElementById('newWordpackName');
     const name = nameInput.value.trim();
     if (!name) { alert('Anna sanalistalle nimi ennen tallennusta!'); return; }
     
     syncTableToWordList();
     const validWords = wordList.filter(w => w.en && w.en.trim() !== '' && w.fi && w.fi.trim() !== '');
-    if (validWords.length === 0) { alert('Taulukko on tyhjä. Lisää ainakin yksi sanapari!'); return; }
+    if (validWords.length === 0) { alert('Taulukko on tyhjÃ¤. LisÃ¤Ã¤ ainakin yksi sanapari!'); return; }
     const packData = { name: name, words: validWords, createdAt: firebase.firestore.FieldValue.serverTimestamp() };
     db.collection('wordpacks').add(packData).then(() => {
         const msg = document.getElementById('saveStatusMsg');
@@ -921,9 +932,13 @@ function saveScoreAndReturn() {
         if (practiceType === 'cards') typeName = 'Kortit';
         else if (practiceType === 'spelling') typeName = 'Kirjoitus';
         else if (practiceType === 'shooter') typeName = 'Kirjainjahti';
-        else if (practiceType === 'pronunciation') typeName = 'Ääntäminen';
+        else if (practiceType === 'pronunciation') typeName = 'Ã„Ã¤ntÃ¤minen';
         
+        const authUser = firebase.auth().currentUser;
+        if (!authUser) { console.error("Ei kirjautunutta kÃ¤yttÃ¤jÃ¤Ã¤, historiaa ei tallenneta."); showView('menuView'); return; }
+
         db.collection('history').add({
+            uid: authUser.uid,
             name: currentUser,
             type: typeName,
             listName: currentListName,
@@ -931,7 +946,8 @@ function saveScoreAndReturn() {
             score: finalGameScore,
             time: document.getElementById('timerDisplay').textContent,
             date: firebase.firestore.FieldValue.serverTimestamp()
-        }).then(() => { loadLeaderboardForCurrentList(); });
+        }).catch(err => { console.error("Historian tallennus epÃ¤onnistui:", err.message); })
+          .then(() => { loadLeaderboardForCurrentList(); });
     }
     showView('menuView');
 }
@@ -956,13 +972,13 @@ function loadLeaderboardForCurrentList() {
             const li = document.createElement('li');
             li.style.color = '#888';
             li.style.textAlign = 'center';
-            li.textContent = 'Ei vielä suorituksia tälle listalle. Ole ensimmäinen!';
+            li.textContent = 'Ei vielÃ¤ suorituksia tÃ¤lle listalle. Ole ensimmÃ¤inen!';
             list.appendChild(li); 
             return; 
         }
         
         results.forEach(d => {
-            const scoreText = d.score !== undefined ? ` | 🏅 ${d.score} p.` : '';
+            const scoreText = d.score !== undefined ? ` | ðŸ… ${d.score} p.` : '';
             const li = document.createElement('li');
             li.className = 'history-item';
             
@@ -973,9 +989,9 @@ function loadLeaderboardForCurrentList() {
             divInfo.appendChild(smallType);
             
             const divResult = document.createElement('div');
-            const spanStars = document.createElement('span'); spanStars.style.cssText = 'color:#F59E0B; font-weight:bold;'; spanStars.textContent = `${d.stars}⭐`;
+            const spanStars = document.createElement('span'); spanStars.style.cssText = 'color:#F59E0B; font-weight:bold;'; spanStars.textContent = `${d.stars}â­`;
             divResult.appendChild(spanStars);
-            divResult.append(`${scoreText} | ⏱️ ${d.time}`);
+            divResult.append(`${scoreText} | â±ï¸ ${d.time}`);
             
             li.appendChild(divInfo);
             li.appendChild(divResult);
