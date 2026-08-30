@@ -18,6 +18,7 @@
         .btn { background-color: var(--primary-color); color: white; border: none; padding: 12px 20px; font-size: 1.1rem; font-weight: bold; border-radius: 12px; cursor: pointer; transition: transform 0.1s; display: inline-flex; align-items: center; justify-content: center; gap: 8px; margin: 5px; text-decoration: none; }
         .btn:hover { transform: scale(1.03); filter: brightness(1.08); }
         .btn-secondary { background-color: var(--secondary-color); } .btn-success { background-color: var(--success-color); } .btn-danger { background-color: var(--danger-color); } .btn-dark { background-color: #333; }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
         .nav-bar { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #EEE; padding-bottom: 12px; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
         .score-bar { display: flex; justify-content: space-around; background: #EFF6FF; padding: 10px; border-radius: 12px; margin-bottom: 20px; font-size: 1.2rem; font-weight: bold; }
         .view { display: none; } .view.active { display: block; }
@@ -119,7 +120,7 @@
 
         <div style="background:#F1F5F9; padding:15px; border-radius:12px; margin-bottom:20px; text-align:center;">
             <label style="font-weight:bold; display:block; margin-bottom:8px;">1. Valitse opeteltava sanalista:</label>
-            <select id="listSelector">
+            <select id="listSelector" aria-label="Valitse sanalista">
                 <option value="">Ladataan sanalistoja pilvestä...</option>
             </select>
             <button class="btn btn-dark" onclick="downloadSelectedWordpack()" style="font-size:0.9rem; padding:8px 15px;">⬇️ Lataa valittu lista</button>
@@ -154,9 +155,9 @@
         <h2>✏️ Kirjoita sana oikein</h2>
         <p style="text-align:center; font-size:1.3rem; font-weight:bold; margin-bottom:15px;" id="spellingPrompt">Käännä englanniksi:</p>
         
-        <form onsubmit="checkSpelling(event)">
+        <form id="spellingForm" onsubmit="checkSpelling(event)">
             <label style="font-weight:bold; display:block; margin-bottom:5px;">Kirjoita vastaus tähän:</label>
-            <input type="text" id="spellingInput" placeholder="Kirjoita sana englanniksi..." autocomplete="off">
+            <input type="text" id="spellingInput" placeholder="Kirjoita sana englanniksi..." autocomplete="off" aria-label="Kirjoita sana englanniksi">
             
             <div id="spellingFeedback" class="status-msg"></div>
             <div id="spellingHintDisplay" class="hint-box">_ _ _ _ _</div>
@@ -166,7 +167,7 @@
                     <button type="button" class="btn btn-secondary" onclick="giveSpellingHint()" id="hintBtn">💡 Vinkki</button>
                     <button type="button" class="btn btn-primary" onclick="speakCurrentWord()">🔊 Kuuntele</button>
                 </div>
-                <button type="submit" class="btn btn-success">Vastaa ➔</button>
+                <button type="submit" id="spellingSubmitBtn" class="btn btn-success">Vastaa ➔</button>
             </div>
         </form>
     </div>
@@ -212,7 +213,7 @@
             <p style="color: var(--primary-color); font-size: 1.8rem; margin-top: 15px;">🏅 Kokonaispisteet: <strong><span id="finalTotalScore">0</span></strong></p>
             
             <div id="questAwardNotice" style="font-size:1.1rem; font-weight:bold; color:#4F46E5; margin-top:15px; display:none; background:#EEF2FF; padding:15px; border-radius:12px; border:2px solid #C7D2FE;">
-                🧙‍♂️ Etenit polulla kohti Taikalinnaa! (Vähintään 3/5 oikein)
+                🧙‍♂️ Etenit polulla kohti Taikalinnaan! (Vähintään 3/5 oikein)
             </div>
         </div>
         <div style="text-align:center;">
@@ -225,8 +226,7 @@
     <div id="settingsView" class="view">
         <h2>➕ Sanalistan lisääminen</h2>
         <p style="text-align:center; color:#666;">Kirjoita sanat alla olevaan taulukkoon, anna listalle nimi ja tallenna se kaikkien saataville.</p>
-        <!-- Tietoturva: Vältetään suoria injektioita tallennettaessa kantaan -->
-        <input type="text" id="newWordpackName" placeholder="Anna listalle nimi (esim. Viikko 42 tai Eläimet)" style="border: 2px solid var(--secondary-color); font-weight:bold;">
+        <input type="text" id="newWordpackName" placeholder="Anna listalle nimi (esim. Viikko 42 tai Eläimet)" style="border: 2px solid var(--secondary-color); font-weight:bold;" aria-label="Sanalistan nimi">
         
         <div id="saveStatusMsg" class="status-msg"></div>
         <div class="table-container">
@@ -283,6 +283,7 @@ const firebaseConfig = {
 
 // --- GLOBAALIT MUUTTUJAT ---
 let currentUser = '';
+let currentUserId = '';
 let wordList = [];
 let currentPracticeWords = [];
 let currentWordIndex = 0, starsEarned = 0, secondsElapsed = 0, shooterScore = 0, finalGameScore = 0;
@@ -292,6 +293,7 @@ let currentListName = '';
 let firebaseApp = null;
 let db = null;
 let isFirebaseConnected = false;
+let isCheckingSpelling = false;
 let appStats = JSON.parse(localStorage.getItem('vocab_app_stats') || '{}');
 let userListProgress = JSON.parse(localStorage.getItem('vocab_list_progress') || '{}');
 
@@ -300,6 +302,7 @@ function speakCurrentWord() {
     if (!currentPracticeWords[currentWordIndex]) return;
     const wordEn = currentPracticeWords[currentWordIndex].en;
     if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel(); // Tyhjennetään mahdolliset aiemmat lukutoiminnot
         const utterance = new SpeechSynthesisUtterance(wordEn);
         utterance.lang = 'en-US';
         utterance.rate = 0.85; 
@@ -375,20 +378,27 @@ const ALLOWED_GMAIL_ACCOUNTS = [
     'leevi.r.kari@gmail.com',
     'sanna.tuikkanen@gmail.com'
 ];
-function isEmailAllowed(email) {
-    const normalized = (email || '').toLowerCase();
-    return normalized.endsWith('@edu.parkano.fi') || ALLOWED_GMAIL_ACCOUNTS.includes(normalized);
+
+function normalizeGmailAddress(email) {
+    const parts = email.split('@');
+    if (parts.length !== 2 || parts[1] !== 'gmail.com') return email;
+    const localPart = parts[0].split('+')[0].replace(/\./g, '');
+    return `${localPart}@gmail.com`;
 }
 
-let currentUserId = '';
+function isEmailAllowed(email) {
+    const normalized = normalizeGmailAddress((email || '').toLowerCase());
+    if (normalized.endsWith('@edu.parkano.fi')) return true;
+    return ALLOWED_GMAIL_ACCOUNTS.some(allowed => normalizeGmailAddress(allowed) === normalized);
+}
 
 function checkExistingLogin() {
     firebase.auth().onAuthStateChanged((user) => {
         if (user) {
-            const email = user.email.toLowerCase();
+            const email = (user.email || '').toLowerCase();
             if (isEmailAllowed(email)) {
                 currentUserId = user.uid;
-                currentUser = user.displayName || user.email.split('@')[0];
+                currentUser = user.displayName || email.split('@')[0] || 'Käyttäjä';
                 document.getElementById('displayUserName').textContent = currentUser;
                 document.getElementById('welcomeNameText').textContent = currentUser;
                 document.getElementById('summaryUserName').textContent = currentUser;
@@ -400,6 +410,13 @@ function checkExistingLogin() {
             } else {
                 firebase.auth().signOut();
                 showView('loginView');
+                const errorEl = document.getElementById('loginErrorMsg');
+                if (errorEl) {
+                    errorEl.style.display = 'block';
+                    errorEl.style.background = '#FEE2E2';
+                    errorEl.style.color = '#991B1B';
+                    errorEl.textContent = `Pääsy evätty! Osoitteella ${email} ei ole käyttöoikeutta.`;
+                }
             }
         } else {
             document.getElementById('mainNav').style.display = 'none';
@@ -411,14 +428,16 @@ function checkExistingLogin() {
 function loginWithGoogle() {
     const provider = new firebase.auth.GoogleAuthProvider();
     const errorEl = document.getElementById('loginErrorMsg');
-    errorEl.style.display = 'none';
+    if (errorEl) errorEl.style.display = 'none';
 
     firebase.auth().signInWithRedirect(provider).catch((error) => {
         console.error("Kirjautumisvirhe:", error);
-        errorEl.style.display = 'block';
-        errorEl.style.background = '#FEE2E2';
-        errorEl.style.color = '#991B1B';
-        errorEl.textContent = "Kirjautuminen epäonnistui: " + error.message;
+        if (errorEl) {
+            errorEl.style.display = 'block';
+            errorEl.style.background = '#FEE2E2';
+            errorEl.style.color = '#991B1B';
+            errorEl.textContent = "Kirjautuminen epäonnistui: " + error.message;
+        }
     });
 }
 
@@ -553,6 +572,7 @@ function setupCard() {
     else document.getElementById('cardFront').textContent = w.fi;
     document.getElementById('cardBack').textContent = ""; 
 }
+
 function flipCard() { 
     isCardFlipped = !isCardFlipped; 
     const w = currentPracticeWords[currentWordIndex];
@@ -560,6 +580,7 @@ function flipCard() {
     else document.getElementById('cardBack').textContent = w.en;
     document.getElementById('flashCard').classList.toggle('flipped'); 
 }
+
 function answerCard(correct) { 
     recordWordResult(currentPracticeWords[currentWordIndex].en, correct);
     if (correct) starsEarned++; 
@@ -570,15 +591,19 @@ function answerCard(correct) {
 // 2. KIRJOITUS
 let currentSpellingWord = '', spellingHintIdx = 0, hintUsed = false;
 function setupSpelling() {
-    hintUsed = false; spellingHintIdx = 0;
+    hintUsed = false; spellingHintIdx = 0; isCheckingSpelling = false;
     const w = currentPracticeWords[currentWordIndex];
     currentSpellingWord = w.en.trim();
     document.getElementById('spellingPrompt').textContent = `Käännä englanniksi: "${w.fi}"`;
-    document.getElementById('spellingInput').value = '';
+    const inputEl = document.getElementById('spellingInput');
+    inputEl.disabled = false;
+    inputEl.value = '';
+    document.getElementById('spellingSubmitBtn').disabled = false;
     document.getElementById('spellingFeedback').style.display = 'none';
-    document.getElementById('spellingInput').focus();
+    inputEl.focus();
     updateSpellingHint();
 }
+
 function updateSpellingHint() {
     let h = '';
     for(let i = 0; i < currentSpellingWord.length; i++) {
@@ -588,14 +613,30 @@ function updateSpellingHint() {
     }
     document.getElementById('spellingHintDisplay').textContent = h.trim();
 }
-function giveSpellingHint() { hintUsed = true; if(spellingHintIdx < currentSpellingWord.length) { spellingHintIdx++; updateSpellingHint(); } }
+
+function giveSpellingHint() { 
+    hintUsed = true; 
+    if(spellingHintIdx < currentSpellingWord.length) { 
+        spellingHintIdx++; 
+        updateSpellingHint(); 
+    } 
+}
+
 function checkSpelling(e) {
     e.preventDefault();
-    const userAns = document.getElementById('spellingInput').value.toLowerCase().trim();
+    if (isCheckingSpelling) return;
+    
+    const inputEl = document.getElementById('spellingInput');
+    const submitBtn = document.getElementById('spellingSubmitBtn');
+    const userAns = inputEl.value.toLowerCase().trim();
     const target = currentSpellingWord.toLowerCase().trim();
     const feedbackEl = document.getElementById('spellingFeedback');
     
     if (userAns === target) {
+        isCheckingSpelling = true;
+        inputEl.disabled = true;
+        submitBtn.disabled = true;
+        
         recordWordResult(currentPracticeWords[currentWordIndex].en, true);
         if(!hintUsed) { starsEarned++; } 
         
@@ -603,7 +644,10 @@ function checkSpelling(e) {
         feedbackEl.textContent = `🎉 Oikein! Hienoa työtä!`;
         document.getElementById('starCount').textContent = starsEarned;
         
-        setTimeout(() => { feedbackEl.style.display = 'none'; nextWord(); }, 1200);
+        setTimeout(() => { 
+            feedbackEl.style.display = 'none'; 
+            nextWord(); 
+        }, 1200);
     } else {
         recordWordResult(currentPracticeWords[currentWordIndex].en, false);
         feedbackEl.style.display = 'block'; feedbackEl.style.background = '#FEE2E2'; feedbackEl.style.color = '#991B1B';
@@ -615,31 +659,49 @@ function checkSpelling(e) {
 // 3. SHOOTER
 let shooterAnim = null, canvas, ctx, player = { x: 280, y: 310, width: 40, height: 25, speed: 6 }, bullets = [], letters = [], targetWord = '', collected = '', keys = {};
 let floatingTexts = [];
+
+function handleShooterKeyDown(e) {
+    if (practiceType !== 'shooter') return;
+    keys[e.code] = true; 
+    if (e.code === 'Space') e.preventDefault();
+}
+
+function handleShooterKeyUp(e) {
+    if (practiceType !== 'shooter') return;
+    keys[e.code] = false;
+}
+
 function setupShooter() {
     canvas = document.getElementById('gameCanvas'); ctx = canvas.getContext('2d');
     const w = currentPracticeWords[currentWordIndex];
     targetWord = w.en.toUpperCase().replace(/[^A-ZÅÄÖ]/g, ''); 
     if(!targetWord) targetWord = "WORD";
     
-    collected = ''; bullets = []; letters = []; floatingTexts = [];
+    collected = ''; bullets = []; letters = []; floatingTexts = []; keys = {};
     document.getElementById('shooterScore').textContent = shooterScore;
     document.getElementById('shooterTargetWord').textContent = w.fi; 
     updateShooterUI();
     
-    window.onkeydown = e => { keys[e.code] = true; if(e.code === 'Space') e.preventDefault(); };
-    window.onkeyup = e => keys[e.code] = false;
+    window.removeEventListener('keydown', handleShooterKeyDown);
+    window.removeEventListener('keyup', handleShooterKeyUp);
+    window.addEventListener('keydown', handleShooterKeyDown);
+    window.addEventListener('keyup', handleShooterKeyUp);
+    
     stopShooterGame(); shooterLoop();
 }
+
 function updateShooterUI() {
     let d = ''; for(let i=0; i<targetWord.length; i++) d += (i < collected.length ? collected[i] : '_') + ' ';
     document.getElementById('shooterCollectedText').textContent = d;
 }
+
 function stopShooterGame() { 
     if (shooterAnim) cancelAnimationFrame(shooterAnim);
-    window.onkeydown = null;
-    window.onkeyup = null;
+    window.removeEventListener('keydown', handleShooterKeyDown);
+    window.removeEventListener('keyup', handleShooterKeyUp);
     keys = {};
 }
+
 function shooterLoop() {
     if ((keys['ArrowLeft'] || keys['KeyA']) && player.x > 0) player.x -= player.speed;
     if ((keys['ArrowRight'] || keys['KeyD']) && player.x < canvas.width - player.width) player.x += player.speed;
@@ -674,6 +736,7 @@ function shooterLoop() {
                         recordWordResult(currentPracticeWords[currentWordIndex].en, true);
                         starsEarned++; document.getElementById('starCount').textContent = starsEarned;
                         speakCurrentWord();
+                        stopShooterGame();
                         setTimeout(() => nextWord(), 600); return; 
                     }
                 } else {
@@ -725,7 +788,11 @@ function startSpeechRecognition() {
     feedbackEl.style.color = '#333';
     feedbackEl.textContent = "Kuuntelen... Sano sana selkeästi! 👂";
 
-    recognition.start();
+    try {
+        recognition.start();
+    } catch(err) {
+        console.error("Puheentunnistuksen aloitus epäonnistui:", err);
+    }
 
     recognition.onresult = (event) => {
         let recognizedText = event.results[0][0].transcript.toLowerCase().trim();
@@ -849,7 +916,7 @@ function loadPacksFromCloud() {
             const p = doc.data(); 
             const opt = document.createElement('option');
             opt.value = doc.id;
-            opt.textContent = `${p.name} (${p.words.length} sanaa)`;
+            opt.textContent = `${p.name} (${p.words ? p.words.length : 0} sanaa)`;
             select.appendChild(opt);
         });
     }).catch(err => {
@@ -862,7 +929,7 @@ function loadPacksFromCloud() {
 function downloadSelectedWordpack() {
     if (!isFirebaseConnected) { alert("Yhteys pilveen katkennut."); return; }
     const id = document.getElementById('listSelector').value;
-    if (!id) return;
+    if (!id) { alert("Valitse ensin sanalista alasvetovalikosta!"); return; }
     
     db.collection('wordpacks').doc(id).get().then(doc => {
         if (doc.exists) {
@@ -905,7 +972,7 @@ function uploadWordsToFirebase() {
         loadPacksFromCloud(); 
         loadLeaderboardForCurrentList();
         updateQuestUI();
-        setTimeout(() => { msg.style.display = 'none'; nameInput.value = ''; showView('menuView'); }, 3000);
+        setTimeout(() => { msg.style.display = 'none'; nameInput.value = ''; showView('menuView'); }, 2000);
     }).catch(err => { alert("Virhe tallennuksessa: " + err.message); });
 }
 
@@ -918,7 +985,7 @@ function saveScoreAndReturn() {
         else if (practiceType === 'pronunciation') typeName = 'Ääntäminen';
         
         const authUser = firebase.auth().currentUser;
-        if (!authUser) { console.error("Ei kirjautunutta käyttäjää, historiaa ei tallenneta."); showView('menuView'); return; }
+        if (!authUser) { showView('menuView'); return; }
 
         db.collection('history').add({
             uid: authUser.uid,
@@ -929,8 +996,11 @@ function saveScoreAndReturn() {
             score: finalGameScore,
             time: document.getElementById('timerDisplay').textContent,
             date: firebase.firestore.FieldValue.serverTimestamp()
-        }).catch(err => { console.error("Historian tallennus epäonnistui:", err.message); })
-          .then(() => { loadLeaderboardForCurrentList(); });
+        }).then(() => { 
+            loadLeaderboardForCurrentList(); 
+        }).catch(err => { 
+            console.error("Historian tallennus epäonnistui:", err.message); 
+        });
     }
     showView('menuView');
 }
@@ -988,14 +1058,16 @@ function loadLeaderboardForCurrentList() {
 
 // --- TABLE LOGIC (SETTINGS VIEW) ---
 function addTableRows(count = 5) { 
-    syncTableToWordList(); // Tallenna jo syötetyt arvot ennen uusien tyhjien rivien lisäämistä
+    syncTableToWordList(); 
     for(let i=0; i<count; i++) wordList.push({en:'', fi:''}); 
     renderWordsTable(); 
 }
 
 function renderWordsTable() {
     const tbody = document.getElementById('wordsTableBody'); tbody.innerHTML = '';
-    if(wordList.length === 0) addTableRows(5);
+    if(wordList.length === 0) {
+        for(let i=0; i<5; i++) wordList.push({en:'', fi:''});
+    }
     wordList.forEach((w, i) => {
         const tr = document.createElement('tr');
         
@@ -1006,6 +1078,7 @@ function renderWordsTable() {
         inputEn.type = 'text';
         inputEn.id = `en_${i}`;
         inputEn.value = w.en;
+        inputEn.setAttribute('aria-label', `Englanninkielinen sana, rivi ${i + 1}`);
         tdEn.appendChild(inputEn);
         
         const tdFi = document.createElement('td');
@@ -1013,6 +1086,7 @@ function renderWordsTable() {
         inputFi.type = 'text';
         inputFi.id = `fi_${i}`;
         inputFi.value = w.fi;
+        inputFi.setAttribute('aria-label', `Suomenkielinen käännös, rivi ${i + 1}`);
         tdFi.appendChild(inputFi);
         
         tr.appendChild(tdNum);
@@ -1026,7 +1100,8 @@ function syncTableToWordList() {
     wordList.forEach((w, i) => {
         const enEl = document.getElementById(`en_${i}`);
         const fiEl = document.getElementById(`fi_${i}`);
-        if(enEl) w.en = enEl.value; if(fiEl) w.fi = fiEl.value;
+        if(enEl) w.en = enEl.value; 
+        if(fiEl) w.fi = fiEl.value;
     });
 }
 </script>
