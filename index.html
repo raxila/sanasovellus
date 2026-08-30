@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Tietoturva: CSP (Content Security Policy) estää haittakoodien lataamisen ulkopuolelta -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://apis.google.com https://www.googleapis.com; connect-src 'self' https://*.firebaseio.com https://*.googleapis.com wss://*.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.gstatic.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: https://www.google.com https://*.googleusercontent.com; frame-src 'self' https://*.firebaseapp.com https://accounts.google.com;">
-    <title>Englannin Sanakoe - Harjoittele sanoja!</title>
+    <title>Englannin Sanakoe - Harjoita sanoja!</title>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -174,7 +174,7 @@
     <!-- 4. SHOOTER GAME -->
     <div id="shooterView" class="view">
         <h2>🚀 Kirjainjahti</h2>
-        <p style="text-align:center;">Tähtää NUOLILLA, ammu VÄLILYÖNNILLÄ oikeat kirjaimet oikeassa järjestyksessä!</p>
+        <p style="text-align:center;">Tähtää NUOLILLA, ammu VÄLILYÖNNILLÄ oikeat kirjaimet järjestäen!</p>
         <div style="display:flex; justify-content:space-between; align-items:center; background:#E2E8F0; padding:8px 15px; border-radius:10px; margin-bottom:10px;">
             <div style="font-size:1.2rem; font-weight:bold; display:flex; align-items:center; gap:10px;">
                 <span>Käännä: <span id="shooterTargetWord" style="color:var(--primary-color);">SANA</span></span>
@@ -369,7 +369,7 @@ function updateQuestUI() {
     playerEl.style.left = progressPct + '%';
 }
 
-// --- KIRJAUTUMINEN JA GOOGLE AUTH (TAPA 1: REDIRECT) ---
+// --- KIRJAUTUMINEN JA GOOGLE AUTH ---
 const ALLOWED_GMAIL_ACCOUNTS = [
     'hannu.t.kari@gmail.com',
     'leevi.r.kari@gmail.com',
@@ -396,17 +396,10 @@ function checkExistingLogin() {
                 document.getElementById('mainNav').style.display = 'block';
                 showView('menuView');
                 updateQuestUI();
+                loadPacksFromCloud();
             } else {
-                // Sähköposti ei sallittu: kirjaudutaan ulos ja näytetään virhe
                 firebase.auth().signOut();
                 showView('loginView');
-                const errorEl = document.getElementById('loginErrorMsg');
-                if (errorEl) {
-                    errorEl.style.display = 'block';
-                    errorEl.style.background = '#FEE2E2';
-                    errorEl.style.color = '#991B1B';
-                    errorEl.textContent = `Pääsy evätty! Osoitteella ${email} ei ole käyttöoikeutta.`;
-                }
             }
         } else {
             document.getElementById('mainNav').style.display = 'none';
@@ -418,12 +411,14 @@ function checkExistingLogin() {
 function loginWithGoogle() {
     const provider = new firebase.auth.GoogleAuthProvider();
     const errorEl = document.getElementById('loginErrorMsg');
-    if (errorEl) errorEl.style.display = 'none';
+    errorEl.style.display = 'none';
 
-    // Käytetään signInWithRedirect (Tapa 1) estämään COOP-virheet
     firebase.auth().signInWithRedirect(provider).catch((error) => {
         console.error("Kirjautumisvirhe:", error);
-        alert("Kirjautuminen epäonnistui: " + error.message);
+        errorEl.style.display = 'block';
+        errorEl.style.background = '#FEE2E2';
+        errorEl.style.color = '#991B1B';
+        errorEl.textContent = "Kirjautuminen epäonnistui: " + error.message;
     });
 }
 
@@ -639,7 +634,12 @@ function updateShooterUI() {
     let d = ''; for(let i=0; i<targetWord.length; i++) d += (i < collected.length ? collected[i] : '_') + ' ';
     document.getElementById('shooterCollectedText').textContent = d;
 }
-function stopShooterGame() { if (shooterAnim) cancelAnimationFrame(shooterAnim); }
+function stopShooterGame() { 
+    if (shooterAnim) cancelAnimationFrame(shooterAnim);
+    window.onkeydown = null;
+    window.onkeyup = null;
+    keys = {};
+}
 function shooterLoop() {
     if ((keys['ArrowLeft'] || keys['KeyA']) && player.x > 0) player.x -= player.speed;
     if ((keys['ArrowRight'] || keys['KeyD']) && player.x < canvas.width - player.width) player.x += player.speed;
@@ -825,7 +825,6 @@ function initFirebaseCloud() {
         db = firebase.firestore(); isFirebaseConnected = true;
         document.getElementById('cloudStatusBadge').classList.add('online');
         document.getElementById('cloudStatusText').textContent = "Pilvi Yhdistetty";
-        loadPacksFromCloud();
     } catch (e) {
         console.error("Cloud Error:", e);
         document.getElementById('cloudStatusText').textContent = "Offline Tila";
@@ -988,7 +987,12 @@ function loadLeaderboardForCurrentList() {
 }
 
 // --- TABLE LOGIC (SETTINGS VIEW) ---
-function addTableRows(count = 5) { for(let i=0; i<count; i++) wordList.push({en:'', fi:''}); renderWordsTable(); }
+function addTableRows(count = 5) { 
+    syncTableToWordList(); // Tallenna jo syötetyt arvot ennen uusien tyhjien rivien lisäämistä
+    for(let i=0; i<count; i++) wordList.push({en:'', fi:''}); 
+    renderWordsTable(); 
+}
+
 function renderWordsTable() {
     const tbody = document.getElementById('wordsTableBody'); tbody.innerHTML = '';
     if(wordList.length === 0) addTableRows(5);
@@ -1017,6 +1021,7 @@ function renderWordsTable() {
         tbody.appendChild(tr);
     });
 }
+
 function syncTableToWordList() {
     wordList.forEach((w, i) => {
         const enEl = document.getElementById(`en_${i}`);
