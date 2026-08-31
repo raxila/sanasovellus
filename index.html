@@ -430,7 +430,8 @@ function loginWithGoogle() {
     const errorEl = document.getElementById('loginErrorMsg');
     if (errorEl) errorEl.style.display = 'none';
 
-    firebase.auth().signInWithRedirect(provider).catch((error) => {
+    // KORJAUS: Vaihdettu signInWithRedirect -> signInWithPopup
+    firebase.auth().signInWithPopup(provider).catch((error) => {
         console.error("Kirjautumisvirhe:", error);
         if (errorEl) {
             errorEl.style.display = 'block';
