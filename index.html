@@ -99,7 +99,7 @@
         <!-- SEIKKAILUREITTI-KORTTI -->
         <div class="quest-card">
             <div id="questTitle" class="quest-title">Matka Taikalinnaan 🏰</div>
-            <div id="questStatus" class="quest-status">Valitse sanalista nähdäksesi seikkailusi!</div>
+            <div id="questStatus" class="quest-status">Valitse sanalista aloittaaksesi seikkailusi!</div>
             
             <div class="quest-track">
                 <div id="questFill" class="quest-fill"></div>
@@ -213,7 +213,7 @@
             <p style="color: var(--primary-color); font-size: 1.8rem; margin-top: 15px;">🏅 Kokonaispisteet: <strong><span id="finalTotalScore">0</span></strong></p>
             
             <div id="questAwardNotice" style="font-size:1.1rem; font-weight:bold; color:#4F46E5; margin-top:15px; display:none; background:#EEF2FF; padding:15px; border-radius:12px; border:2px solid #C7D2FE;">
-                🧙‍♂️ Etenit polulla kohti Taikalinnaan! (Vähintään 3/5 oikein)
+                <!-- Sisältö päivitetään dynaamisesti JS:ssä -->
             </div>
         </div>
         <div style="text-align:center;">
@@ -294,8 +294,11 @@ let firebaseApp = null;
 let db = null;
 let isFirebaseConnected = false;
 let isCheckingSpelling = false;
+
+// Pelin tilastot
 let appStats = JSON.parse(localStorage.getItem('vocab_app_stats') || '{}');
 let userListProgress = JSON.parse(localStorage.getItem('vocab_list_progress') || '{}');
+let userListStreaks = JSON.parse(localStorage.getItem('vocab_list_streaks') || '{}'); // UUSI PUTKITALLENNUS
 
 // --- ÄÄNISYNTEESI (TTS) ---
 function speakCurrentWord() {
@@ -326,12 +329,64 @@ function getCurrentListProgress() {
     return userListProgress[currentUserId][currentListName] || 0;
 }
 
-function incrementListProgress() {
+function updateListProgress(stars) {
     if (!currentUserId || !currentListName) return;
+    
+    // Alustetaan objektit tarvittaessa
     if (!userListProgress[currentUserId]) userListProgress[currentUserId] = {};
-    let current = userListProgress[currentUserId][currentListName] || 0;
-    userListProgress[currentUserId][currentListName] = current + 1;
+    if (!userListStreaks[currentUserId]) userListStreaks[currentUserId] = {};
+    
+    let currentProgress = userListProgress[currentUserId][currentListName] || 0;
+    let currentStreak = userListStreaks[currentUserId][currentListName] || 0;
+    
+    const awardNotice = document.getElementById('questAwardNotice');
+    
+    if (stars === 5) {
+        currentStreak++;
+        if (currentStreak >= 5) {
+            currentProgress += 2;
+            currentStreak = 0; // Nollataan putki
+            awardNotice.innerHTML = "🌟 <strong>Upeaa!</strong> 5 kertaa peräkkäin 5/5 tähteä!<br>🧙‍♂️ Tuplaloikka! Siirryit 2 ruutua eteenpäin!";
+        } else {
+            currentProgress += 1;
+            awardNotice.innerHTML = `Täydellistä! 5/5 tähteä! 🔥 Putkesi: <strong>${currentStreak}/5</strong><br>🧙‍♂️ Etenit yhdellä ruudulla eteenpäin.`;
+        }
+    } else {
+        currentStreak = 0; // Katkaise putki jos tulee alle 5 tähteä
+        
+        if (stars < 3) {
+            currentProgress -= 1;
+            if (currentProgress < 0) currentProgress = 0; // Ei alle nollan
+            awardNotice.innerHTML = "Sait alle 3 tähteä. 😔<br>Siirryt yhden ruudun taaksepäin. Yritä uudelleen!";
+            // Puna-sävyinen varoitusväri taantumiselle
+            awardNotice.style.background = '#FEF2F2';
+            awardNotice.style.borderColor = '#FECACA';
+            awardNotice.style.color = '#991B1B';
+        } else {
+            currentProgress += 1;
+            awardNotice.innerHTML = "Hienoa! Sait vähintään 3 tähteä.<br>🧙‍♂️ Etenit yhdellä ruudulla eteenpäin!";
+            // Normaalit menestysvärit
+            awardNotice.style.background = '#EEF2FF';
+            awardNotice.style.borderColor = '#C7D2FE';
+            awardNotice.style.color = '#4F46E5';
+        }
+    }
+    
+    // Palautetaan perusväri, jos ei menty taaksepäin
+    if (stars >= 3) {
+        awardNotice.style.background = '#EEF2FF';
+        awardNotice.style.borderColor = '#C7D2FE';
+        awardNotice.style.color = '#4F46E5';
+    }
+    
+    awardNotice.style.display = 'block';
+    
+    // Tallennus
+    userListProgress[currentUserId][currentListName] = currentProgress;
+    userListStreaks[currentUserId][currentListName] = currentStreak;
+    
     localStorage.setItem('vocab_list_progress', JSON.stringify(userListProgress));
+    localStorage.setItem('vocab_list_streaks', JSON.stringify(userListStreaks));
 }
 
 function updateQuestUI() {
@@ -342,15 +397,21 @@ function updateQuestUI() {
 
     if (!currentUser || !currentListName) {
         titleEl.textContent = "Matka Taikalinnaan 🏰";
-        statusEl.textContent = "Valitse sanalista aloittaaksesi seikkailusi!";
+        statusEl.innerHTML = "Valitse sanalista aloittaaksesi seikkailusi!<br><small style='color:#6B7280;'>(≥3⭐ vie eteenpäin, &lt;3⭐ taaksepäin. 5x täydet pisteet = tuplaloikka!)</small>";
         fillEl.style.width = '0%';
         playerEl.style.left = '0%';
         return;
     }
 
     const passed = getCurrentListProgress();
-    const maxMilestone = 18;
     
+    // Hae nykyinen putki
+    let streak = 0;
+    if (userListStreaks[currentUserId] && userListStreaks[currentUserId][currentListName]) {
+        streak = userListStreaks[currentUserId][currentListName];
+    }
+    
+    const maxMilestone = 18;
     titleEl.textContent = `Seikkailu listalla: ${currentListName}`;
     
     let locationName = "Leirissä";
@@ -362,9 +423,10 @@ function updateQuestUI() {
     else if (passed >= 3) { locationName = "Synkässä metsässä"; nextGoal = 7; }
     
     if (passed >= 18) {
-        statusEl.textContent = `Olet saavuttanut linnan tällä listalla! (${passed} peliä pelattu)`;
+        statusEl.innerHTML = `Olet saavuttanut linnan tällä listalla! (${passed} peliä pelattu)`;
     } else {
-        statusEl.textContent = `Olet ${locationName}. Seuraava etappi: ${passed} / ${nextGoal} peliä (väh. 3⭐)`;
+        let streakText = streak > 0 ? `<br>🔥 5/5 putki: <strong>${streak}/5</strong> (Tuplaloikka lähestyy!)` : "";
+        statusEl.innerHTML = `Olet ${locationName}. Seuraava etappi: ${passed} / ${nextGoal} peliä${streakText}`;
     }
 
     const progressPct = Math.min(100, (passed / maxMilestone) * 100);
@@ -430,7 +492,6 @@ function loginWithGoogle() {
     const errorEl = document.getElementById('loginErrorMsg');
     if (errorEl) errorEl.style.display = 'none';
 
-    // KORJAUS: Vaihdettu signInWithRedirect -> signInWithPopup
     firebase.auth().signInWithPopup(provider).catch((error) => {
         console.error("Kirjautumisvirhe:", error);
         if (errorEl) {
@@ -543,12 +604,11 @@ function nextWord() {
         document.getElementById('finalTime').textContent = document.getElementById('timerDisplay').textContent;
         document.getElementById('finalTotalScore').textContent = finalGameScore;
         
-        const awardNotice = document.getElementById('questAwardNotice');
-        if (starsEarned >= 3 && currentListName) {
-            incrementListProgress();
-            awardNotice.style.display = 'block';
+        // Päivitetään eteneminen uusilla säännöillä
+        if (currentListName) {
+            updateListProgress(starsEarned);
         } else {
-            awardNotice.style.display = 'none';
+            document.getElementById('questAwardNotice').style.display = 'none';
         }
         
         showView('summaryView');
