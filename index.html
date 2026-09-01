@@ -720,16 +720,58 @@ function checkSpelling(e) {
 // 3. SHOOTER
 let shooterAnim = null, canvas, ctx, player = { x: 280, y: 310, width: 40, height: 25, speed: 6 }, bullets = [], letters = [], targetWord = '', collected = '', keys = {};
 let floatingTexts = [];
+let touchX = null; // Tallentaa sormen/hiiren X-koordinaatin
 
 function handleShooterKeyDown(e) {
     if (practiceType !== 'shooter') return;
     keys[e.code] = true; 
-    if (e.code === 'Space') e.preventDefault();
+    if (['Space', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.code)) {
+        e.preventDefault();
+    }
 }
 
 function handleShooterKeyUp(e) {
     if (practiceType !== 'shooter') return;
     keys[e.code] = false;
+}
+
+function getCanvasX(clientX) {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    return (clientX - rect.left) * scaleX;
+}
+
+function handleTouchStart(e) {
+    e.preventDefault();
+    if (e.touches.length > 0) {
+        touchX = getCanvasX(e.touches[0].clientX);
+    }
+}
+
+function handleTouchMove(e) {
+    e.preventDefault();
+    if (e.touches.length > 0) {
+        touchX = getCanvasX(e.touches[0].clientX);
+    }
+}
+
+function handleTouchEnd(e) {
+    e.preventDefault();
+    touchX = null;
+}
+
+function handleMouseDown(e) {
+    touchX = getCanvasX(e.clientX);
+}
+
+function handleMouseMove(e) {
+    if (touchX !== null) {
+        touchX = getCanvasX(e.clientX);
+    }
+}
+
+function handleMouseUp(e) {
+    touchX = null;
 }
 
 function setupShooter() {
@@ -739,14 +781,30 @@ function setupShooter() {
     if(!targetWord) targetWord = "WORD";
     
     collected = ''; bullets = []; letters = []; floatingTexts = []; keys = {};
+    touchX = null;
     document.getElementById('shooterScore').textContent = shooterScore;
     document.getElementById('shooterTargetWord').textContent = w.fi; 
     updateShooterUI();
     
+    // Poistetaan vanhat kuuntelijat varmuuden vuoksi
     window.removeEventListener('keydown', handleShooterKeyDown);
     window.removeEventListener('keyup', handleShooterKeyUp);
+    canvas.removeEventListener('touchstart', handleTouchStart);
+    canvas.removeEventListener('touchmove', handleTouchMove);
+    canvas.removeEventListener('touchend', handleTouchEnd);
+    canvas.removeEventListener('mousedown', handleMouseDown);
+    canvas.removeEventListener('mousemove', handleMouseMove);
+    canvas.removeEventListener('mouseup', handleMouseUp);
+
+    // Lisätään uudet kuuntelijat
     window.addEventListener('keydown', handleShooterKeyDown);
     window.addEventListener('keyup', handleShooterKeyUp);
+    canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+    canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+    canvas.addEventListener('touchend', handleTouchEnd, { passive: false });
+    canvas.addEventListener('mousedown', handleMouseDown);
+    canvas.addEventListener('mousemove', handleMouseMove);
+    canvas.addEventListener('mouseup', handleMouseUp);
     
     stopShooterGame(); shooterLoop();
 }
@@ -760,13 +818,40 @@ function stopShooterGame() {
     if (shooterAnim) cancelAnimationFrame(shooterAnim);
     window.removeEventListener('keydown', handleShooterKeyDown);
     window.removeEventListener('keyup', handleShooterKeyUp);
+    if (canvas) {
+        canvas.removeEventListener('touchstart', handleTouchStart);
+        canvas.removeEventListener('touchmove', handleTouchMove);
+        canvas.removeEventListener('touchend', handleTouchEnd);
+        canvas.removeEventListener('mousedown', handleMouseDown);
+        canvas.removeEventListener('mousemove', handleMouseMove);
+        canvas.removeEventListener('mouseup', handleMouseUp);
+    }
     keys = {};
+    touchX = null;
 }
 
 function shooterLoop() {
+    // Näppäimistöohjaus
     if ((keys['ArrowLeft'] || keys['KeyA']) && player.x > 0) player.x -= player.speed;
     if ((keys['ArrowRight'] || keys['KeyD']) && player.x < canvas.width - player.width) player.x += player.speed;
-    if (keys['Space']) { if (!player.lastShot || Date.now() - player.lastShot > 250) { bullets.push({ x: player.x + player.width/2, y: player.y, speed: 7 }); player.lastShot = Date.now(); } }
+    if (keys['Space']) { 
+        if (!player.lastShot || Date.now() - player.lastShot > 250) { 
+            bullets.push({ x: player.x + player.width/2, y: player.y, speed: 7 }); 
+            player.lastShot = Date.now(); 
+        } 
+    }
+
+    // Kosketus- / hiiriohjaus
+    if (touchX !== null) {
+        let targetPlayerX = touchX - player.width / 2;
+        player.x = Math.max(0, Math.min(canvas.width - player.width, targetPlayerX));
+        
+        // Ampuu automaattisesti kun sormi on näytöllä
+        if (!player.lastShot || Date.now() - player.lastShot > 250) {
+            bullets.push({ x: player.x + player.width/2, y: player.y, speed: 7 });
+            player.lastShot = Date.now();
+        }
+    }
     
     ctx.fillStyle = '#1E293B'; ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = '#FF9F1C'; ctx.beginPath(); ctx.moveTo(player.x, player.y + player.height); ctx.lineTo(player.x + player.width/2, player.y); ctx.lineTo(player.x + player.width, player.y + player.height); ctx.fill();
