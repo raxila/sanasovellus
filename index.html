@@ -4,13 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Tietoturva: CSP (Content Security Policy) -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://apis.google.com https://www.googleapis.com; connect-src 'self' https://*.firebaseio.com https://*.googleapis.com wss://*.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.gstatic.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: https://www.google.com https://*.googleusercontent.com; frame-src 'self' https://*.firebaseapp.com https://accounts.google.com;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://apis.google.com https://www.googleapis.com https://www.google.com https://www.recaptcha.net; connect-src 'self' https://*.firebaseio.com https://*.googleapis.com wss://*.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.gstatic.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: https://www.google.com https://*.googleusercontent.com; frame-src 'self' https://*.firebaseapp.com https://accounts.google.com https://www.google.com https://recaptcha.google.com;">
     <title>Englannin Sanakoe - Harjoita sanoja!</title>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-check-compat.js"></script>
     <style>
-        :root { --primary-color: #4A90E2; --secondary-color: #FF9F1C; --success-color: #2EC4B6; --danger-color: #E71D36; --bg-color: #F4F7F6; --card-bg: #FFFFFF; --text-color: #2B2D42; --border-radius: 16px; }
+        :root { 
+            --primary-color: #4A90E2; 
+            --secondary-color: #FF9F1C; 
+            --success-color: #2EC4B6; 
+            --danger-color: #E71D36; 
+            --bg-color: #F4F7F6; 
+            --card-bg: #FFFFFF; 
+            --text-color: #2B2D42; 
+            --border-radius: 16px; 
+        }
         * { box-sizing: border-box; font-family: 'Comic Sans MS', 'Chalkboard SE', 'Fredoka', sans-serif, system-ui; }
         body { background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 15px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
         #app { background: var(--card-bg); width: 100%; max-width: 800px; border-radius: var(--border-radius); box-shadow: 0 10px 25px rgba(0,0,0,0.1); padding: 25px; position: relative; overflow: hidden; }
@@ -283,6 +293,7 @@ let currentPracticeWords = [];
 let currentWordIndex = 0, starsEarned = 0, secondsElapsed = 0, shooterScore = 0, finalGameScore = 0;
 let practiceType = '';
 let timerInterval = null;
+let spellingFeedbackTimeout = null;
 let currentListName = '';
 let firebaseApp = null;
 let db = null;
@@ -317,9 +328,12 @@ window.onload = function() {
     updateQuestUI();
     
     // Ota "Enter" kiinni nimimerkkikentässä
-    document.getElementById('nicknameInput').addEventListener('keypress', function (e) {
-        if (e.key === 'Enter') saveNickname();
-    });
+    const nicknameInput = document.getElementById('nicknameInput');
+    if (nicknameInput) {
+        nicknameInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') saveNickname();
+        });
+    }
 };
 
 function getCurrentListProgress() {
@@ -449,6 +463,12 @@ function checkExistingLogin() {
     });
 }
 
+const NICKNAME_BANNED_WORDS = ['perkele', 'vittu', 'saatana', 'idiootti', 'admin', 'opettaja'];
+function containsBannedWord(name) {
+    const lower = name.toLowerCase();
+    return NICKNAME_BANNED_WORDS.some(word => lower.includes(word));
+}
+
 function saveNickname() {
     const nameInput = document.getElementById('nicknameInput').value.trim();
     const errorEl = document.getElementById('loginErrorMsg');
@@ -458,6 +478,14 @@ function saveNickname() {
         errorEl.style.background = '#FEF3C7';
         errorEl.style.color = '#B45309';
         errorEl.textContent = "Nimimerkin tulee olla vähintään 2 merkkiä pitkä!";
+        return;
+    }
+
+    if (containsBannedWord(nameInput)) {
+        errorEl.style.display = 'block';
+        errorEl.style.background = '#FEF3C7';
+        errorEl.style.color = '#B45309';
+        errorEl.textContent = "Valitse toinen nimimerkki - tämä ei sovi tähän sovellukseen.";
         return;
     }
     
@@ -625,6 +653,8 @@ function answerCard(correct) {
 let currentSpellingWord = '', spellingHintIdx = 0, hintUsed = false;
 function setupSpelling() {
     hintUsed = false; spellingHintIdx = 0; isCheckingSpelling = false;
+    if (spellingFeedbackTimeout) clearTimeout(spellingFeedbackTimeout);
+    
     const w = currentPracticeWords[currentWordIndex];
     currentSpellingWord = w.en.trim();
     document.getElementById('spellingPrompt').textContent = `Käännä englanniksi: "${w.fi}"`;
@@ -658,6 +688,7 @@ function giveSpellingHint() {
 function checkSpelling(e) {
     e.preventDefault();
     if (isCheckingSpelling) return;
+    if (spellingFeedbackTimeout) clearTimeout(spellingFeedbackTimeout);
     
     const inputEl = document.getElementById('spellingInput');
     const submitBtn = document.getElementById('spellingSubmitBtn');
@@ -677,7 +708,7 @@ function checkSpelling(e) {
         feedbackEl.textContent = `🎉 Oikein! Hienoa työtä!`;
         document.getElementById('starCount').textContent = starsEarned;
         
-        setTimeout(() => { 
+        spellingFeedbackTimeout = setTimeout(() => { 
             feedbackEl.style.display = 'none'; 
             nextWord(); 
         }, 1200);
@@ -685,7 +716,7 @@ function checkSpelling(e) {
         recordWordResult(currentPracticeWords[currentWordIndex].en, false);
         feedbackEl.style.display = 'block'; feedbackEl.style.background = '#FEE2E2'; feedbackEl.style.color = '#991B1B';
         feedbackEl.textContent = `❌ Väärin! Yritä uudelleen.`; 
-        setTimeout(() => { feedbackEl.style.display = 'none'; }, 2000);
+        spellingFeedbackTimeout = setTimeout(() => { feedbackEl.style.display = 'none'; }, 2000);
     }
 }
 
@@ -751,9 +782,9 @@ function stopShooterGame() {
     window.removeEventListener('keydown', handleShooterKeyDown);
     window.removeEventListener('keyup', handleShooterKeyUp);
     if (canvas) {
-        canvas.removeEventListener('touchstart', handleTouchStart);
-        canvas.removeEventListener('touchmove', handleTouchMove);
-        canvas.removeEventListener('touchend', handleTouchEnd);
+        canvas.removeEventListener('touchstart', handleTouchStart, { passive: false });
+        canvas.removeEventListener('touchmove', handleTouchMove, { passive: false });
+        canvas.removeEventListener('touchend', handleTouchEnd, { passive: false });
         canvas.removeEventListener('mousedown', handleMouseDown);
         canvas.removeEventListener('mousemove', handleMouseMove);
         canvas.removeEventListener('mouseup', handleMouseUp);
@@ -949,6 +980,17 @@ function openStatsView() {
 function initFirebaseCloud() {
     try {
         if (!firebase.apps.length) firebaseApp = firebase.initializeApp(firebaseConfig); else firebaseApp = firebase.app();
+
+        // App Check -virheensieto: aktivoidaan vain jos reCAPTCHA-avain on korvattu pätevällä avaimella
+        const siteKey = 'RECAPTCHA_SITE_KEY_TÄHÄN';
+        if (siteKey && siteKey !== 'RECAPTCHA_SITE_KEY_TÄHÄN') {
+            try {
+                firebase.appCheck().activate(siteKey, true);
+            } catch (acErr) {
+                console.warn("App Check alustaminen epäonnistui:", acErr.message);
+            }
+        }
+
         db = firebase.firestore(); isFirebaseConnected = true;
         document.getElementById('cloudStatusBadge').classList.add('online');
         document.getElementById('cloudStatusText').textContent = "Pilvi Yhdistetty";
@@ -1046,7 +1088,7 @@ function saveScoreAndReturn() {
 
         db.collection('history').add({
             uid: authUser.uid,
-            name: currentUser, // Tässä käytetään käyttäjän asettamaa nimimerkkiä
+            name: currentUser,
             type: typeName,
             listName: currentListName,
             stars: starsEarned,
