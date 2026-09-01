@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Tietoturva: CSP (Content Security Policy) estää haittakoodien lataamisen ulkopuolelta -->
+    <!-- Tietoturva: CSP (Content Security Policy) -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://apis.google.com https://www.googleapis.com; connect-src 'self' https://*.firebaseio.com https://*.googleapis.com wss://*.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.gstatic.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: https://www.google.com https://*.googleusercontent.com; frame-src 'self' https://*.firebaseapp.com https://accounts.google.com;">
     <title>Englannin Sanakoe - Harjoita sanoja!</title>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -56,13 +56,14 @@
 </head>
 <body>
 <div id="app">
-    <!-- 0. LOGIN VIEW -->
+    <!-- 0. LOGIN VIEW (ANONYYMI + NIMIMERKKI) -->
     <div id="loginView" class="view active">
         <h1>👋 Tervetuloa!</h1>
         <div style="background:#F1F5F9; padding:20px; border-radius:12px; text-align:center; max-width: 400px; margin: 40px auto;">
-            <p style="font-weight:bold; font-size:1.1rem;">Kirjaudu sisään koulun tai sallitulla Google-tilillä:</p>
-            <button class="btn btn-primary" onclick="loginWithGoogle()" style="width:100%; margin-top:15px; font-size:1.1rem; padding:12px;">
-                🔑 Kirjaudu Google-tilillä
+            <p style="font-weight:bold; font-size:1.1rem;">Keksi itsellesi nimimerkki peliä varten:</p>
+            <input type="text" id="nicknameInput" placeholder="Syötä nimimerkki..." autocomplete="off" style="width: 100%; padding: 12px; font-size: 1.1rem; text-align: center; margin-bottom: 15px;">
+            <button class="btn btn-primary" onclick="saveNickname()" style="width:100%; font-size:1.1rem; padding:12px;">
+                🎮 Aloita peli
             </button>
             <div id="loginErrorMsg" class="status-msg" style="margin-top:15px; font-size:0.9rem;"></div>
         </div>
@@ -79,7 +80,7 @@
             <div>
                 <button class="btn btn-primary" onclick="openStatsView()">📊 Tilastot</button>
                 <button class="btn btn-dark" onclick="showView('settingsView')">➕ Lisää lista</button>
-                <button class="btn btn-danger" onclick="logoutUser()" style="padding: 6px 12px; font-size: 0.9rem;">Kirjaudu ulos</button>
+                <button class="btn btn-danger" onclick="changeNickname()" style="padding: 6px 12px; font-size: 0.9rem;">Vaihda nimimerkki</button>
             </div>
         </div>
     </div>
@@ -103,8 +104,6 @@
             
             <div class="quest-track">
                 <div id="questFill" class="quest-fill"></div>
-                
-                <!-- Etapit -->
                 <div class="quest-milestones">
                     <span title="Leiri (Aloitus)">⛺</span>
                     <span title="Metsä (3 peliä)">🌲</span>
@@ -112,8 +111,6 @@
                     <span title="Vuori (12 peliä)">⛰️</span>
                     <span title="Linna (18 peliä)">🏰</span>
                 </div>
-                
-                <!-- Pelaajan hahmo -->
                 <div id="questPlayer" class="quest-player">🧙‍♂️</div>
             </div>
         </div>
@@ -158,7 +155,6 @@
         <form id="spellingForm" onsubmit="checkSpelling(event)">
             <label style="font-weight:bold; display:block; margin-bottom:5px;">Kirjoita vastaus tähän:</label>
             <input type="text" id="spellingInput" placeholder="Kirjoita sana englanniksi..." autocomplete="off" aria-label="Kirjoita sana englanniksi">
-            
             <div id="spellingFeedback" class="status-msg"></div>
             <div id="spellingHintDisplay" class="hint-box">_ _ _ _ _</div>
             
@@ -175,7 +171,7 @@
     <!-- 4. SHOOTER GAME -->
     <div id="shooterView" class="view">
         <h2>🚀 Kirjainjahti</h2>
-        <p style="text-align:center;">Tähtää NUOLILLA, ammu VÄLILYÖNNILLÄ oikeat kirjaimet järjestäen!</p>
+        <p style="text-align:center;">Tähtää NUOLILLA tai SORMEN KOSKETUKSELLA. Ampuminen on automaattista!</p>
         <div style="display:flex; justify-content:space-between; align-items:center; background:#E2E8F0; padding:8px 15px; border-radius:10px; margin-bottom:10px;">
             <div style="font-size:1.2rem; font-weight:bold; display:flex; align-items:center; gap:10px;">
                 <span>Käännä: <span id="shooterTargetWord" style="color:var(--primary-color);">SANA</span></span>
@@ -212,9 +208,7 @@
             <p>Aika: <strong><span id="finalTime">00:00</span></strong></p>
             <p style="color: var(--primary-color); font-size: 1.8rem; margin-top: 15px;">🏅 Kokonaispisteet: <strong><span id="finalTotalScore">0</span></strong></p>
             
-            <div id="questAwardNotice" style="font-size:1.1rem; font-weight:bold; color:#4F46E5; margin-top:15px; display:none; background:#EEF2FF; padding:15px; border-radius:12px; border:2px solid #C7D2FE;">
-                <!-- Sisältö päivitetään dynaamisesti JS:ssä -->
-            </div>
+            <div id="questAwardNotice" style="font-size:1.1rem; font-weight:bold; color:#4F46E5; margin-top:15px; display:none; background:#EEF2FF; padding:15px; border-radius:12px; border:2px solid #C7D2FE;"></div>
         </div>
         <div style="text-align:center;">
             <p style="color:#666; margin-bottom:20px;">Tuloksesi on tallennettu automaattisesti pilveen nimelläsi.</p>
@@ -298,14 +292,14 @@ let isCheckingSpelling = false;
 // Pelin tilastot
 let appStats = JSON.parse(localStorage.getItem('vocab_app_stats') || '{}');
 let userListProgress = JSON.parse(localStorage.getItem('vocab_list_progress') || '{}');
-let userListStreaks = JSON.parse(localStorage.getItem('vocab_list_streaks') || '{}'); // UUSI PUTKITALLENNUS
+let userListStreaks = JSON.parse(localStorage.getItem('vocab_list_streaks') || '{}');
 
 // --- ÄÄNISYNTEESI (TTS) ---
 function speakCurrentWord() {
     if (!currentPracticeWords[currentWordIndex]) return;
     const wordEn = currentPracticeWords[currentWordIndex].en;
     if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel(); // Tyhjennetään mahdolliset aiemmat lukutoiminnot
+        window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(wordEn);
         utterance.lang = 'en-US';
         utterance.rate = 0.85; 
@@ -321,6 +315,11 @@ window.onload = function() {
     initFirebaseCloud();
     checkExistingLogin();
     updateQuestUI();
+    
+    // Ota "Enter" kiinni nimimerkkikentässä
+    document.getElementById('nicknameInput').addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') saveNickname();
+    });
 };
 
 function getCurrentListProgress() {
@@ -332,56 +331,42 @@ function getCurrentListProgress() {
 function updateListProgress(stars) {
     if (!currentUserId || !currentListName) return;
     
-    // Alustetaan objektit tarvittaessa
     if (!userListProgress[currentUserId]) userListProgress[currentUserId] = {};
     if (!userListStreaks[currentUserId]) userListStreaks[currentUserId] = {};
     
     let currentProgress = userListProgress[currentUserId][currentListName] || 0;
     let currentStreak = userListStreaks[currentUserId][currentListName] || 0;
-    
     const awardNotice = document.getElementById('questAwardNotice');
     
     if (stars === 5) {
         currentStreak++;
         if (currentStreak >= 5) {
             currentProgress += 2;
-            currentStreak = 0; // Nollataan putki
+            currentStreak = 0;
             awardNotice.innerHTML = "🌟 <strong>Upeaa!</strong> 5 kertaa peräkkäin 5/5 tähteä!<br>🧙‍♂️ Tuplaloikka! Siirryit 2 ruutua eteenpäin!";
         } else {
             currentProgress += 1;
             awardNotice.innerHTML = `Täydellistä! 5/5 tähteä! 🔥 Putkesi: <strong>${currentStreak}/5</strong><br>🧙‍♂️ Etenit yhdellä ruudulla eteenpäin.`;
         }
     } else {
-        currentStreak = 0; // Katkaise putki jos tulee alle 5 tähteä
-        
+        currentStreak = 0;
         if (stars < 3) {
             currentProgress -= 1;
-            if (currentProgress < 0) currentProgress = 0; // Ei alle nollan
+            if (currentProgress < 0) currentProgress = 0;
             awardNotice.innerHTML = "Sait alle 3 tähteä. 😔<br>Siirryt yhden ruudun taaksepäin. Yritä uudelleen!";
-            // Puna-sävyinen varoitusväri taantumiselle
-            awardNotice.style.background = '#FEF2F2';
-            awardNotice.style.borderColor = '#FECACA';
-            awardNotice.style.color = '#991B1B';
+            awardNotice.style.background = '#FEF2F2'; awardNotice.style.borderColor = '#FECACA'; awardNotice.style.color = '#991B1B';
         } else {
             currentProgress += 1;
             awardNotice.innerHTML = "Hienoa! Sait vähintään 3 tähteä.<br>🧙‍♂️ Etenit yhdellä ruudulla eteenpäin!";
-            // Normaalit menestysvärit
-            awardNotice.style.background = '#EEF2FF';
-            awardNotice.style.borderColor = '#C7D2FE';
-            awardNotice.style.color = '#4F46E5';
+            awardNotice.style.background = '#EEF2FF'; awardNotice.style.borderColor = '#C7D2FE'; awardNotice.style.color = '#4F46E5';
         }
     }
     
-    // Palautetaan perusväri, jos ei menty taaksepäin
     if (stars >= 3) {
-        awardNotice.style.background = '#EEF2FF';
-        awardNotice.style.borderColor = '#C7D2FE';
-        awardNotice.style.color = '#4F46E5';
+        awardNotice.style.background = '#EEF2FF'; awardNotice.style.borderColor = '#C7D2FE'; awardNotice.style.color = '#4F46E5';
     }
     
     awardNotice.style.display = 'block';
-    
-    // Tallennus
     userListProgress[currentUserId][currentListName] = currentProgress;
     userListStreaks[currentUserId][currentListName] = currentStreak;
     
@@ -404,8 +389,6 @@ function updateQuestUI() {
     }
 
     const passed = getCurrentListProgress();
-    
-    // Hae nykyinen putki
     let streak = 0;
     if (userListStreaks[currentUserId] && userListStreaks[currentUserId][currentListName]) {
         streak = userListStreaks[currentUserId][currentListName];
@@ -434,84 +417,74 @@ function updateQuestUI() {
     playerEl.style.left = progressPct + '%';
 }
 
-// --- KIRJAUTUMINEN JA GOOGLE AUTH ---
-const ALLOWED_GMAIL_ACCOUNTS = [
-    'hannu.t.kari@gmail.com',
-    'leevi.r.kari@gmail.com',
-    'sanna.tuikkanen@gmail.com'
-];
-
-function normalizeGmailAddress(email) {
-    const parts = email.split('@');
-    if (parts.length !== 2 || parts[1] !== 'gmail.com') return email;
-    const localPart = parts[0].split('+')[0].replace(/\./g, '');
-    return `${localPart}@gmail.com`;
-}
-
-function isEmailAllowed(email) {
-    const normalized = normalizeGmailAddress((email || '').toLowerCase());
-    if (normalized.endsWith('@edu.parkano.fi')) return true;
-    return ALLOWED_GMAIL_ACCOUNTS.some(allowed => normalizeGmailAddress(allowed) === normalized);
-}
-
+// --- ANONYYMI KIRJAUTUMINEN JA NIMIMERKIN TALLENNUS ---
 function checkExistingLogin() {
     firebase.auth().onAuthStateChanged((user) => {
         if (user) {
-            const email = (user.email || '').toLowerCase();
-            if (isEmailAllowed(email)) {
-                currentUserId = user.uid;
-                currentUser = user.displayName || email.split('@')[0] || 'Käyttäjä';
-                document.getElementById('displayUserName').textContent = currentUser;
-                document.getElementById('welcomeNameText').textContent = currentUser;
-                document.getElementById('summaryUserName').textContent = currentUser;
-                document.getElementById('statsUserNameDisplay').textContent = currentUser;
-                document.getElementById('mainNav').style.display = 'block';
-                showView('menuView');
-                updateQuestUI();
-                loadPacksFromCloud();
+            currentUserId = user.uid;
+            
+            // Tarkistetaan onko nimimerkki jo asetettu
+            let savedName = localStorage.getItem('vocab_nickname');
+            if (savedName) {
+                setUserNameAndProceed(savedName);
             } else {
-                firebase.auth().signOut();
+                document.getElementById('mainNav').style.display = 'none';
                 showView('loginView');
+            }
+        } else {
+            // Suoritetaan anonyymi kirjautuminen automaattisesti taustalla
+            firebase.auth().signInAnonymously().then(() => {
+                console.log("Kirjauduttu anonyymisti UID:lla:", firebase.auth().currentUser.uid);
+            }).catch((error) => {
+                console.error("Virhe anonyymissä kirjautumisessa:", error);
                 const errorEl = document.getElementById('loginErrorMsg');
                 if (errorEl) {
                     errorEl.style.display = 'block';
                     errorEl.style.background = '#FEE2E2';
                     errorEl.style.color = '#991B1B';
-                    errorEl.textContent = `Pääsy evätty! Osoitteella ${email} ei ole käyttöoikeutta.`;
+                    errorEl.textContent = "Kirjautuminen epäonnistui: " + error.message;
                 }
-            }
-        } else {
-            document.getElementById('mainNav').style.display = 'none';
-            showView('loginView');
+            });
         }
     });
 }
 
-function loginWithGoogle() {
-    const provider = new firebase.auth.GoogleAuthProvider();
+function saveNickname() {
+    const nameInput = document.getElementById('nicknameInput').value.trim();
     const errorEl = document.getElementById('loginErrorMsg');
-    if (errorEl) errorEl.style.display = 'none';
-
-    firebase.auth().signInWithPopup(provider).catch((error) => {
-        console.error("Kirjautumisvirhe:", error);
-        if (errorEl) {
-            errorEl.style.display = 'block';
-            errorEl.style.background = '#FEE2E2';
-            errorEl.style.color = '#991B1B';
-            errorEl.textContent = "Kirjautuminen epäonnistui: " + error.message;
-        }
-    });
+    
+    if (nameInput.length < 2) {
+        errorEl.style.display = 'block';
+        errorEl.style.background = '#FEF3C7';
+        errorEl.style.color = '#B45309';
+        errorEl.textContent = "Nimimerkin tulee olla vähintään 2 merkkiä pitkä!";
+        return;
+    }
+    
+    errorEl.style.display = 'none';
+    localStorage.setItem('vocab_nickname', nameInput);
+    setUserNameAndProceed(nameInput);
 }
 
-function logoutUser() {
-    firebase.auth().signOut().then(() => {
-        currentUser = ''; 
-        currentUserId = '';
-        currentListName = ''; 
-        wordList = [];
-        document.getElementById('mainNav').style.display = 'none';
-        showView('loginView');
-    });
+function setUserNameAndProceed(name) {
+    currentUser = name;
+    document.getElementById('displayUserName').textContent = currentUser;
+    document.getElementById('welcomeNameText').textContent = currentUser;
+    document.getElementById('summaryUserName').textContent = currentUser;
+    document.getElementById('statsUserNameDisplay').textContent = currentUser;
+    
+    document.getElementById('mainNav').style.display = 'block';
+    showView('menuView');
+    updateQuestUI();
+    loadPacksFromCloud();
+}
+
+function changeNickname() {
+    localStorage.removeItem('vocab_nickname');
+    currentUser = '';
+    document.getElementById('nicknameInput').value = '';
+    document.getElementById('mainNav').style.display = 'none';
+    showView('loginView');
 }
 
 function recordWordResult(wordEn, isCorrect) {
@@ -604,7 +577,6 @@ function nextWord() {
         document.getElementById('finalTime').textContent = document.getElementById('timerDisplay').textContent;
         document.getElementById('finalTotalScore').textContent = finalGameScore;
         
-        // Päivitetään eteneminen uusilla säännöillä
         if (currentListName) {
             updateListProgress(starsEarned);
         } else {
@@ -720,20 +692,15 @@ function checkSpelling(e) {
 // 3. SHOOTER
 let shooterAnim = null, canvas, ctx, player = { x: 280, y: 310, width: 40, height: 25, speed: 6 }, bullets = [], letters = [], targetWord = '', collected = '', keys = {};
 let floatingTexts = [];
-let touchX = null; // Tallentaa sormen/hiiren X-koordinaatin
+let touchX = null;
 
 function handleShooterKeyDown(e) {
     if (practiceType !== 'shooter') return;
     keys[e.code] = true; 
-    if (['Space', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.code)) {
-        e.preventDefault();
-    }
+    if (['Space', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.code)) e.preventDefault();
 }
 
-function handleShooterKeyUp(e) {
-    if (practiceType !== 'shooter') return;
-    keys[e.code] = false;
-}
+function handleShooterKeyUp(e) { if (practiceType !== 'shooter') return; keys[e.code] = false; }
 
 function getCanvasX(clientX) {
     const rect = canvas.getBoundingClientRect();
@@ -741,38 +708,12 @@ function getCanvasX(clientX) {
     return (clientX - rect.left) * scaleX;
 }
 
-function handleTouchStart(e) {
-    e.preventDefault();
-    if (e.touches.length > 0) {
-        touchX = getCanvasX(e.touches[0].clientX);
-    }
-}
-
-function handleTouchMove(e) {
-    e.preventDefault();
-    if (e.touches.length > 0) {
-        touchX = getCanvasX(e.touches[0].clientX);
-    }
-}
-
-function handleTouchEnd(e) {
-    e.preventDefault();
-    touchX = null;
-}
-
-function handleMouseDown(e) {
-    touchX = getCanvasX(e.clientX);
-}
-
-function handleMouseMove(e) {
-    if (touchX !== null) {
-        touchX = getCanvasX(e.clientX);
-    }
-}
-
-function handleMouseUp(e) {
-    touchX = null;
-}
+function handleTouchStart(e) { e.preventDefault(); if (e.touches.length > 0) touchX = getCanvasX(e.touches[0].clientX); }
+function handleTouchMove(e) { e.preventDefault(); if (e.touches.length > 0) touchX = getCanvasX(e.touches[0].clientX); }
+function handleTouchEnd(e) { e.preventDefault(); touchX = null; }
+function handleMouseDown(e) { touchX = getCanvasX(e.clientX); }
+function handleMouseMove(e) { if (touchX !== null) touchX = getCanvasX(e.clientX); }
+function handleMouseUp(e) { touchX = null; }
 
 function setupShooter() {
     canvas = document.getElementById('gameCanvas'); ctx = canvas.getContext('2d');
@@ -786,27 +727,18 @@ function setupShooter() {
     document.getElementById('shooterTargetWord').textContent = w.fi; 
     updateShooterUI();
     
-    // Poistetaan vanhat kuuntelijat varmuuden vuoksi
-    window.removeEventListener('keydown', handleShooterKeyDown);
-    window.removeEventListener('keyup', handleShooterKeyUp);
-    canvas.removeEventListener('touchstart', handleTouchStart);
-    canvas.removeEventListener('touchmove', handleTouchMove);
-    canvas.removeEventListener('touchend', handleTouchEnd);
-    canvas.removeEventListener('mousedown', handleMouseDown);
-    canvas.removeEventListener('mousemove', handleMouseMove);
-    canvas.removeEventListener('mouseup', handleMouseUp);
+    stopShooterGame();
 
-    // Lisätään uudet kuuntelijat
-    window.addEventListener('keydown', handleShooterKeyDown);
-    window.addEventListener('keyup', handleShooterKeyUp);
     canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
     canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
     canvas.addEventListener('touchend', handleTouchEnd, { passive: false });
     canvas.addEventListener('mousedown', handleMouseDown);
     canvas.addEventListener('mousemove', handleMouseMove);
     canvas.addEventListener('mouseup', handleMouseUp);
+    window.addEventListener('keydown', handleShooterKeyDown);
+    window.addEventListener('keyup', handleShooterKeyUp);
     
-    stopShooterGame(); shooterLoop();
+    shooterLoop();
 }
 
 function updateShooterUI() {
@@ -831,7 +763,6 @@ function stopShooterGame() {
 }
 
 function shooterLoop() {
-    // Näppäimistöohjaus
     if ((keys['ArrowLeft'] || keys['KeyA']) && player.x > 0) player.x -= player.speed;
     if ((keys['ArrowRight'] || keys['KeyD']) && player.x < canvas.width - player.width) player.x += player.speed;
     if (keys['Space']) { 
@@ -841,12 +772,10 @@ function shooterLoop() {
         } 
     }
 
-    // Kosketus- / hiiriohjaus
     if (touchX !== null) {
         let targetPlayerX = touchX - player.width / 2;
         player.x = Math.max(0, Math.min(canvas.width - player.width, targetPlayerX));
         
-        // Ampuu automaattisesti kun sormi on näytöllä
         if (!player.lastShot || Date.now() - player.lastShot > 250) {
             bullets.push({ x: player.x + player.width/2, y: player.y, speed: 7 });
             player.lastShot = Date.now();
@@ -934,11 +863,7 @@ function startSpeechRecognition() {
     feedbackEl.style.color = '#333';
     feedbackEl.textContent = "Kuuntelen... Sano sana selkeästi! 👂";
 
-    try {
-        recognition.start();
-    } catch(err) {
-        console.error("Puheentunnistuksen aloitus epäonnistui:", err);
-    }
+    try { recognition.start(); } catch(err) { console.error("Puheentunnistuksen aloitus epäonnistui:", err); }
 
     recognition.onresult = (event) => {
         let recognizedText = event.results[0][0].transcript.toLowerCase().trim();
@@ -952,11 +877,9 @@ function startSpeechRecognition() {
             
             feedbackEl.style.background = '#DCFCE7'; 
             feedbackEl.style.color = '#15803D';
-            if (confidence >= 80) {
-                feedbackEl.textContent = `🌟 Täydellistä! Sanoit hienosti "${targetText}"!`;
-            } else {
-                feedbackEl.textContent = `👍 Hienosti yritetty! Ymmärsin sanan "${targetText}".`;
-            }
+            if (confidence >= 80) feedbackEl.textContent = `🌟 Täydellistä! Sanoit hienosti "${targetText}"!`;
+            else feedbackEl.textContent = `👍 Hienosti yritetty! Ymmärsin sanan "${targetText}".`;
+            
             btnSpeak.style.display = 'none';
             document.getElementById('btnNextPronunciation').style.display = 'inline-flex';
         } else {
@@ -971,18 +894,13 @@ function startSpeechRecognition() {
     recognition.onerror = (event) => {
         feedbackEl.style.background = '#FEF3C7'; 
         feedbackEl.style.color = '#B45309';
-        if (event.error === 'no-speech') {
-            feedbackEl.textContent = "En kuullut mitään. Yritä painaa nappia uudelleen ja puhua kovempaa! 🎤";
-        } else {
-            feedbackEl.textContent = "Virhe tunnistuksessa. Varmista, että selaimella on mikrofonin luvat!";
-        }
+        if (event.error === 'no-speech') feedbackEl.textContent = "En kuullut mitään. Yritä painaa nappia uudelleen ja puhua kovempaa! 🎤";
+        else feedbackEl.textContent = "Virhe tunnistuksessa. Varmista, että selaimella on mikrofonin luvat!";
     };
 
     recognition.onend = () => {
         btnSpeak.classList.remove("recording");
-        if (btnSpeak.style.display !== 'none') {
-            btnSpeak.textContent = "🎤 Yritä uudestaan";
-        }
+        if (btnSpeak.style.display !== 'none') btnSpeak.textContent = "🎤 Yritä uudestaan";
     };
 }
 
@@ -1021,11 +939,7 @@ function openStatsView() {
         const tdPct = document.createElement('td'); tdPct.textContent = percentStr;
         const tdStars = document.createElement('td'); tdStars.className = 'star-rating'; tdStars.textContent = starRating;
         
-        tr.appendChild(tdEn);
-        tr.appendChild(tdFi);
-        tr.appendChild(tdScore);
-        tr.appendChild(tdPct);
-        tr.appendChild(tdStars);
+        tr.appendChild(tdEn); tr.appendChild(tdFi); tr.appendChild(tdScore); tr.appendChild(tdPct); tr.appendChild(tdStars);
         tbody.appendChild(tr);
     });
     showView('statsView');
@@ -1054,10 +968,7 @@ function loadPacksFromCloud() {
         defaultOpt.textContent = "-- Valitse sanalista --";
         select.appendChild(defaultOpt);
 
-        if(snap.empty) { 
-            defaultOpt.textContent = "Ei sanalistoja pilvessä."; 
-            return; 
-        }
+        if(snap.empty) { defaultOpt.textContent = "Ei sanalistoja pilvessä."; return; }
         snap.forEach(doc => { 
             const p = doc.data(); 
             const opt = document.createElement('option');
@@ -1135,7 +1046,7 @@ function saveScoreAndReturn() {
 
         db.collection('history').add({
             uid: authUser.uid,
-            name: currentUser,
+            name: currentUser, // Tässä käytetään käyttäjän asettamaa nimimerkkiä
             type: typeName,
             listName: currentListName,
             stars: starsEarned,
@@ -1169,11 +1080,9 @@ function loadLeaderboardForCurrentList() {
         list.innerHTML = '';
         if(results.length === 0) { 
             const li = document.createElement('li');
-            li.style.color = '#888';
-            li.style.textAlign = 'center';
+            li.style.color = '#888'; li.style.textAlign = 'center';
             li.textContent = 'Ei vielä suorituksia tälle listalle. Ole ensimmäinen!';
-            list.appendChild(li); 
-            return; 
+            list.appendChild(li); return; 
         }
         
         results.forEach(d => {
@@ -1182,11 +1091,9 @@ function loadLeaderboardForCurrentList() {
             li.className = 'history-item';
             
             const divInfo = document.createElement('div');
-            const strongName = document.createElement('strong'); 
-            strongName.textContent = d.name;
+            const strongName = document.createElement('strong'); strongName.textContent = d.name;
             const smallType = document.createElement('small'); smallType.style.color = '#666'; smallType.textContent = ` - ${d.type}`;
-            divInfo.appendChild(strongName);
-            divInfo.appendChild(smallType);
+            divInfo.appendChild(strongName); divInfo.appendChild(smallType);
             
             const divResult = document.createElement('div');
             const spanStars = document.createElement('span'); spanStars.style.cssText = 'color:#F59E0B; font-weight:bold;'; spanStars.textContent = `${d.stars}⭐`;
@@ -1195,8 +1102,7 @@ function loadLeaderboardForCurrentList() {
             const txtNode = document.createTextNode(`${scoreText} | ⏱️ ${d.time}`);
             divResult.appendChild(txtNode);
             
-            li.appendChild(divInfo);
-            li.appendChild(divResult);
+            li.appendChild(divInfo); li.appendChild(divResult);
             list.appendChild(li);
         });
     }).catch(err => console.error("Virhe tulostaulukon haussa:", err));
@@ -1221,23 +1127,17 @@ function renderWordsTable() {
         
         const tdEn = document.createElement('td');
         const inputEn = document.createElement('input');
-        inputEn.type = 'text';
-        inputEn.id = `en_${i}`;
-        inputEn.value = w.en;
+        inputEn.type = 'text'; inputEn.id = `en_${i}`; inputEn.value = w.en;
         inputEn.setAttribute('aria-label', `Englanninkielinen sana, rivi ${i + 1}`);
         tdEn.appendChild(inputEn);
         
         const tdFi = document.createElement('td');
         const inputFi = document.createElement('input');
-        inputFi.type = 'text';
-        inputFi.id = `fi_${i}`;
-        inputFi.value = w.fi;
+        inputFi.type = 'text'; inputFi.id = `fi_${i}`; inputFi.value = w.fi;
         inputFi.setAttribute('aria-label', `Suomenkielinen käännös, rivi ${i + 1}`);
         tdFi.appendChild(inputFi);
         
-        tr.appendChild(tdNum);
-        tr.appendChild(tdEn);
-        tr.appendChild(tdFi);
+        tr.appendChild(tdNum); tr.appendChild(tdEn); tr.appendChild(tdFi);
         tbody.appendChild(tr);
     });
 }
